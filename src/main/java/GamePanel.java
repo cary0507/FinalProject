@@ -1,18 +1,33 @@
+/*
+ * Author: Cary
+ * Description:
+ * */
+
 import javax.swing.*;
 import java.awt.*;
+
 
 public class GamePanel extends JPanel implements  Runnable{
 
     final int PANEL_WIDTH = 1200;
     final int PANEL_HEIGHT = 800;
+    final int HORIZON = PANEL_HEIGHT - 200;
 
+    KeyHandler keyboard = new KeyHandler();
     Thread gameThread;
+
+    // Player setting
+    int playerX = 100;
+    int playerY = HORIZON;
+    int playerSpeed = 4;
 
     public GamePanel() {
         // Set the preferred size of the panel
-        setPreferredSize(new java.awt.Dimension(PANEL_WIDTH, PANEL_HEIGHT));
-        setBackground(java.awt.Color.WHITE);
-        setDoubleBuffered(true);  // Smoother rendering
+        this.setPreferredSize(new java.awt.Dimension(PANEL_WIDTH, PANEL_HEIGHT));
+        this.setBackground(java.awt.Color.WHITE);
+        this.setDoubleBuffered(true);  // Smoother rendering
+        this.addKeyListener(keyboard);  // Add key detection
+        this.setFocusable(true);  // Focus on this game panel
     }
 
     public void startGameThread() {
@@ -22,11 +37,12 @@ public class GamePanel extends JPanel implements  Runnable{
 
     @Override
     public void run() {
-        // Update game state
-        update();
-        // Refresh background
-        repaint();
-        // Render objects on screen
+        while (gameThread != null) {
+            // Update game state
+            update();
+            // Refresh background
+            repaint();
+        }
 
     }
 
@@ -34,7 +50,10 @@ public class GamePanel extends JPanel implements  Runnable{
 
     }
 
-    public void renderComponent(Graphics g) {
-        paintComponent(g);
+    public void renderComponent(Graphics target) {
+        super.paintComponent(target);
+        Graphics2D g2D = (Graphics2D) target;
+        g2D.setColor(Color.white);
+        g2D.fillRect(playerX, playerY, PANEL_WIDTH, PANEL_HEIGHT);
     }
 }

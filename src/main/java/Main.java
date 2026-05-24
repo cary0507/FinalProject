@@ -6,7 +6,8 @@
 import javax.swing.JFrame;
 import javax.swing.ImageIcon;
 
-public class Kingdom{
+
+public class Main {
     public static void main(String[] args) {
         // Create the main screen
         JFrame mainScreen = new JFrame("Kingdom");
