@@ -1,7 +1,7 @@
 /*
- * Author: Cary
- * Description:
- * */
+* Author: Cary
+* Description:
+* */
 
 import javax.swing.*;
 import java.awt.*;
@@ -15,11 +15,6 @@ public class GamePanel extends JPanel implements  Runnable{
 
     KeyHandler keyboard = new KeyHandler();
     Thread gameThread;
-
-    // Player setting
-    int playerX = 100;
-    int playerY = HORIZON;
-    int playerSpeed = 4;
 
     public GamePanel() {
         // Set the preferred size of the panel
@@ -43,17 +38,10 @@ public class GamePanel extends JPanel implements  Runnable{
             // Refresh background
             repaint();
         }
-
     }
 
     public void update() {
 
     }
 
-    public void renderComponent(Graphics target) {
-        super.paintComponent(target);
-        Graphics2D g2D = (Graphics2D) target;
-        g2D.setColor(Color.white);
-        g2D.fillRect(playerX, playerY, PANEL_WIDTH, PANEL_HEIGHT);
-    }
 }
