@@ -10,6 +10,10 @@ public class Item extends Entity {
         return this.hasPicked;
     }
 
+    public void pickUp() {
+        this.hasPicked = true;
+    }
+
     public void releaseItem() {
         this.hasPicked = false;
     }

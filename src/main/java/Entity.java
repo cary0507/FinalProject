@@ -1,22 +1,26 @@
 public class Entity {
     // Scalar magnitudes
-    private double acceleration;
-    private double speed = 0;
+    public double acceleration;
+    public double speed = 0;
     private double maxSpeed;
-    private double facingDir;
+    public double facingDir;
     // Vector components
     private double accX;
     private double accY;
     private double velX;
     private double velY;
-    private int x;
-    private int y;
+    // The pixels on the screen has to be a whole number, hence the int type.
+    public int x;
+    public int y;
     private int hitboxWidth;
     private int hitboxHeight;
     // Stores image file paths
     private String[] animePaths;  // How it looks when it is moving
     private String iconPath;  // How it looks when at stationary
 
+    /**
+     * Initializes the entity with its position, hitbox dimensions, and movement parameters.
+     * */
     public Entity(int x, int y, int hitboxWidth, int hitboxHeight, double maxSpeed, double acceleration) {
         this.x = x;
         this.y = y;
@@ -26,19 +30,31 @@ public class Entity {
         this.acceleration = acceleration;
     }
 
-    public int getX() {
-        return this.x;
+    /**
+     * Reads the hitbox width
+     * */
+    public int getHitboxWidth() {
+        return this.hitboxWidth;
     }
 
-    public int getY() {
-        return this.y;
+    /**
+     * Reads the hitbox height
+     * */
+    public int getHitboxHeight() {
+        return this.hitboxHeight;
     }
 
+    /**
+     * Calculate the acceleration vector components based on the facing direction and acceleration magnitude.
+     * */
     public void updateAccVectors() {
         this.accX = Math.cos(this.facingDir) * this.acceleration;
         this.accY = Math.sin(this.facingDir) * this.acceleration;
     }
 
+    /**
+     * Calculate the velocity vector components based on the current velocity, acceleration, and facing direction.
+     * */
     public void updateVelVectors() {
         double newVelX = this.velX + this.accX;
         double newVelY = this.velY + this.accY;
@@ -52,5 +68,13 @@ public class Entity {
             this.velX = newVelX;
             this.velY = newVelY;
         }
+    }
+
+    /**
+     * Update the position of the entity based on its velocity vector components.
+     * */
+    public void projectileMotion() {
+        this.x += (int) this.velX;
+        this.y += (int) this.velY;
     }
 }
