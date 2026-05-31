@@ -1,4 +1,6 @@
-public class Player extends Entity {
+import java.io.Serializable;
+
+public class Player extends Entity implements Serializable {
     // Anchors the crown the player's head
     private final int HEAD_OFFSET_X = 5;
     private final int HEAD_OFFSET_Y = -5;
@@ -19,7 +21,7 @@ public class Player extends Entity {
         this.y = (int) mount.x + mount.getHitboxHeight() / 2 + playerHeight / 2;
         int crownX = x + HEAD_OFFSET_X;
         int crownY = y + HEAD_OFFSET_Y;
-        this.crown = new Item(crownX, crownY, 10, 10, 5, 0, "crown");
+        this.crown = new Item(crownX, crownY, 10, 10, 5, 0, 0);
         this.crown.hasPicked = true;  // Without this line the player will lose the crown immediately after game starts
     }
 
@@ -42,5 +44,12 @@ public class Player extends Entity {
         mount = newMount;         // Switch to the new mount
         mount.isMounted = true;   // Mount the new mount
         anchorsMount(newMount);   // Update the player's position to follow the new mount
+    }
+
+    public Item loseCrown() {
+        this.crown.hasPicked = false;
+        Item lostCrown = this.crown.clone();  // Create a copy of the crown to drop on the ground
+        this.crown = null;
+        return lostCrown;
     }
 }

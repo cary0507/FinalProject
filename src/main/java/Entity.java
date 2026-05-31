@@ -1,4 +1,6 @@
-public class Entity {
+import java.io.Serializable;
+
+public class Entity implements Serializable {
     // Scalar magnitudes
     public double acceleration;
     public double speed = 0;
@@ -48,6 +50,13 @@ public class Entity {
      * */
     public int getHitboxHeight() {
         return this.hitboxHeight;
+    }
+
+    /**
+     * Reads the maximum speed of the entity
+     * */
+    public double getMaxSpeed() {
+        return this.maxSpeed;
     }
 
     /**

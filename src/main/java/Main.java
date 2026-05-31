@@ -5,14 +5,20 @@
 
 import javax.swing.JFrame;
 import javax.swing.ImageIcon;
+import java.io.FileNotFoundException;
 
 
 public class Main {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws FileNotFoundException {
         // Create the main screen
         JFrame mainScreen = new JFrame("Kingdom");
         mainScreen.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         mainScreen.setResizable(false);
+        //Read files
+        String filePath;
+        // Icon setup
+        ImageIcon icon = new ImageIcon("src/main/resources/images/crown icon.jpg");
+        mainScreen.setIconImage(icon.getImage());
         // Apply the game panel layout
         GamePanel gamePanel = new GamePanel();
         mainScreen.add(gamePanel);
@@ -20,8 +26,5 @@ public class Main {
         // Display the window
         mainScreen.setVisible(true);
         mainScreen.setLocationRelativeTo(null);  // Center the window on the screen
-        // Icon setup
-        ImageIcon icon = new ImageIcon("src/main/resources/images/crown icon.jpg");
-        mainScreen.setIconImage(icon.getImage());
     }
 }

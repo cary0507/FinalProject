@@ -1,11 +1,12 @@
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class MoneyBag {
+public class MoneyBag implements Serializable {
     private ArrayList<Item> coins;
     private ArrayList<Item> items;
 
     public void addCoin(Item coin) {
-        if (coin.getName().equals("coin")) {
+        if (coin.getId() == GamePanel.COIN_ID) {
             coins.add(coin);
         }
     }
