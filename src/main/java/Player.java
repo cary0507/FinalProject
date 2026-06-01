@@ -12,7 +12,7 @@ public class Player extends Entity {
      * @param playerWidth the player's width (for anchoring the crown)
      * */
     public Player(Mountable mount, int playerHeight, int playerWidth, String imagePath) {
-        super(0, 0, playerWidth, playerHeight, 0, 0);
+        super(0, 0, playerWidth, playerHeight, 0);
         this.mount = mount;
         // Anchor the player to the center of the mount, and the crown to the player's head
         this.x = (int) mount.x + mount.hitboxWidth / 2 - playerWidth / 2;

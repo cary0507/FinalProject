@@ -1,7 +1,7 @@
 /**
  * Represents an in-game item entity.
  *
- * <p>An Item is a type of {@link Entity} that can exist on the ground or be
+ * <p>An Item is a type of {@link Projectile} that can exist on the ground or be
  * picked up by a player or another object (Some buildings can hold items). Each Item has a persistent identifier
  * ({@link #id}) used to distinguish item types and a flag ({@link #hasPicked})
  * that indicates whether the item is currently being carried/picked up.
@@ -12,7 +12,7 @@
  * if (!coin.hasPicked) { /* render on ground * / }
  * </pre>
  */
-public class Item extends Entity {
+public class Item extends Projectile {
 
     /**
      * True when the item has been picked up (is being carried) and false when

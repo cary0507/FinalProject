@@ -10,14 +10,14 @@ public class Structure implements Serializable {
     public final int maxHP;
     public int curHP;
     public GameData.ID id;
-    public ArrayList<Item> containedItems;
 
-    public Structure(int x, int y, int height, int width, int maxHP) {
+    public Structure(int x, int y, int height, int width, int maxHP, GameData.ID id) {
         this.x = x;
         this.y = y;
         this.height = height;
         this.width = width;
         this.maxHP = maxHP;
         this.curHP = maxHP;
+        this.id = id;
     }
 }

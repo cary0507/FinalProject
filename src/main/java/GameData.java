@@ -20,8 +20,12 @@ public class GameData implements Serializable {
         TEMPLE_ID,
         WALL_ID,
         ARCHERY_TOWER_ID,
-        PORTAL_ID
+        PORTAL_ID,
+        CAMP_ID,
+        HORSE_CORRAL_ID,
+        BOW_SHELF_ID,
+        HAMMER_SHELF_ID
     }
-    // Object
+    // Objects
     Player player;
 }
