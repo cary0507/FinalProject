@@ -1,25 +1,25 @@
-public class Wall extends Structure {
+public class UpgradableStruct extends ContainerStruct {
     public int level;
     public final String[] LEVEL_IMG_PATH;
     public int princeLvlUp;
 
-    public Wall(int x, int y, String[] levelImgPath) {
-        super(x, y, 0, 0, 0, GameData.ID.WALL_ID, levelImgPath[0]);
+    public UpgradableStruct(int x, int y, String[] levelImgPath, GameData.ID id, int[][] relativePos) {
+        super(x, y, 0, 0, 0, id, levelImgPath[0], relativePos);
         this.LEVEL_IMG_PATH = levelImgPath;
         this.level = 0;
         this.princeLvlUp = 1;
     }
 
-    public void levelUp() {
+    public void levelUp(int newWidth, int newHeight) {
         if (this.level >= LEVEL_IMG_PATH.length) {
             return;
         }
         this.level++;
         this.princeLvlUp *= 3;
-        this.maxHP = 5 + 5 * this.level;
+        this.maxHP = 5 + 5 * (this.level - 1);
         this.curHP = this.maxHP;
-        this.width = 10;
-        this.height = 5 + 10 * (this.level  - 1);
+        this.width = newWidth;
+        this.height = newHeight;
         this.imagePath = this.LEVEL_IMG_PATH[this.level];
     }
 }

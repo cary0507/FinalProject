@@ -28,20 +28,11 @@ public class Item extends Projectile {
      */
     public Item(int x, int y, int hitboxWidth, int hitboxHeight, double maxSpeed, GameData.ID id,
                 String imagePath) {
-        super(x, y, hitboxWidth, hitboxHeight, maxSpeed, 0, 9.81, 0, 0, imagePath);
+        super(x, y, hitboxWidth, hitboxHeight, maxSpeed, 0, GameData.GRAVITY, 0, 0, imagePath);
         this.hasPicked = false;
         this.id = id;
     }
 
-    /**
-     * Create a shallow copy/duplicate of this Item.
-     *
-     * <p>The returned {@code Item} shares the same primitive property values and
-     * the same {@link #id}. Mutable object fields (if any are added later)
-     * would still reference the same objects (shallow copy semantics).
-     *
-     * @return a new {@code Item} whose properties match this instance
-     */
     public Item duplicate() {
         Item cloned = new Item(
                 this.x, this.y, this.hitboxWidth, this.hitboxHeight, this.maxSpeed,

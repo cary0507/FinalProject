@@ -26,4 +26,8 @@ public class Entity implements Serializable {
         this.maxSpeed = maxSpeed;
         this.imagePath = imagePath;
     }
+
+    public Entity duplicate() {
+        return new Entity(this.x, this.y, this.hitboxWidth, this.hitboxHeight, this.maxSpeed, this.imagePath);
+    }
 }

@@ -1,8 +1,10 @@
 import java.io.Serializable;
 
 public class GameData implements Serializable {
+    public static final double GRAVITY = 9.8;
+    public static final String COIN_IMG_PATH = "Fix later";
     // List all IDs
-    public static enum ID {
+    public enum ID {
         // Item's ID
         CROWN_ID,
         COIN_ID,

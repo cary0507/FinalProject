@@ -8,10 +8,10 @@ public class Player extends Entity {
     /**
      * Initializes the player with crown anchored to the head
      * @param mount the player's mount
-     * @param playerHeight the player's height (for anchoring the crown)
      * @param playerWidth the player's width (for anchoring the crown)
-     * */
-    public Player(Mountable mount, int playerHeight, int playerWidth, String imagePath, String crownImg) {
+     * @param playerHeight the player's height (for anchoring the crown)
+     */
+    public Player(Mountable mount, int playerWidth, int playerHeight, String imagePath, String crownImg) {
         super(0, 0, playerWidth, playerHeight, 0, imagePath);
         this.mount = mount;
         // Anchor the player to the center of the mount, and the crown to the player's head
