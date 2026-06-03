@@ -12,7 +12,7 @@ public class GamePanel extends JPanel implements Runnable {
     // Environment settings
     final int PANEL_WIDTH = 1200;
     final int PANEL_HEIGHT = 800;
-    final int HORIZON = PANEL_HEIGHT - 200;
+    final int HORIZON = PANEL_HEIGHT - 300;
     final int FPS = 60;
     final int NANO_SEC = 1_000_000_000;
     final int MILLI_SEC = 1_000;
@@ -38,10 +38,11 @@ public class GamePanel extends JPanel implements Runnable {
         double drawInterval = (double) NANO_SEC / FPS;  // Time per frame in nanoseconds
         double deltaTime = 0;
         long lastTime = System.nanoTime();
+        long currentTime;
 
         while (gameThread != null) {
             // Calculate the time elapsed since the last frame
-            long currentTime = System.nanoTime();
+            currentTime = System.nanoTime();
             deltaTime += (currentTime - lastTime) / drawInterval;  // Accumulate the time in terms of frames
             lastTime = currentTime;
             if (deltaTime >= 1) {

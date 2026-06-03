@@ -1,29 +1,31 @@
 public class Player extends Entity {
     // Offsets to nchors the crown the player's head
-    public final int HEAD_OFFSET_X = 5;
-    public final int HEAD_OFFSET_Y = -5;
+    public final int HEAD_OFFSET_X = 15;
+    public final int HEAD_OFFSET_Y = -15;
     private Mountable mount;
     private Item crown;
+    KeyHandler keyInput;
+    GamePanel gamePanel;
 
     /**
-     * Initializes the player with crown anchored to the head
-     * @param mount the player's mount
-     * @param playerWidth the player's width (for anchoring the crown)
-     * @param playerHeight the player's height (for anchoring the crown)
+     * Initializes the player with crown anchored to the head and riding a default horse
+     * @param keyHandler the key handler to control the player
+     * @param gamePanel the game panel to render the player
      */
-    public Player(Mountable mount, int playerWidth, int playerHeight, String imagePath, String crownImg) {
-        super(0, 0, playerWidth, playerHeight, 0, imagePath);
-        this.mount = mount;
-        // Anchor the player to the center of the mount, and the crown to the player's head
-        this.x = (int) mount.x + mount.hitboxWidth / 2 - playerWidth / 2;
-        this.y = (int) mount.x + mount.hitboxHeight / 2 + playerHeight / 2;
-        // Calculate crown's position based on the player's position and head offsets
-        int crownX = x + HEAD_OFFSET_X;
-        int crownY = y + HEAD_OFFSET_Y;
-        this.crown = new Item(
-                crownX, crownY, 10, 10, 5, GameData.ID.CROWN_ID, crownImg
-        );
-        this.crown.hasPicked = true;  // Without this line the player will lose the crown immediately after game starts
+    public Player(KeyHandler keyHandler, GamePanel gamePanel, String imagePath) {
+        super(0, 0, 10, 10, 0, imagePath);
+        this.keyInput = keyHandler;
+        this.gamePanel = gamePanel;
+    }
+
+    public void setDefaultValues() {
+
+    }
+
+    public void setMount(Mountable mount) {}
+
+    public void update() {
+        
     }
 
     /**
@@ -48,9 +50,9 @@ public class Player extends Entity {
     }
 
     public Item loseCrown() {
-        this.crown.hasPicked = false;
-        Item lostCrown = this.crown.duplicate();  // Create a copy of the crown to drop on the ground
-        this.crown = null;
+        crown.hasPicked = false;
+        Item lostCrown = crown.duplicate();  // Create a copy of the crown to drop on the ground
+        crown = null;
         return lostCrown;
     }
 }
