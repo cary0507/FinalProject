@@ -21,8 +21,8 @@ public class Projectile extends Entity {
      *
      */
     public Projectile(int x, int y, int hitboxWidth, int hitboxHeight, double maxSpeed, double accX, double accY,
-                      double velX, double velY) {
-        super(x, y, hitboxWidth, hitboxHeight, maxSpeed);
+                      double velX, double velY, GamePanel gamePanel) {
+        super(x, y, hitboxWidth, hitboxHeight, maxSpeed, gamePanel);
         this.accX = accX;
         this.accY = accY;
         this.velX = velX;

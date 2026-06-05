@@ -14,10 +14,15 @@ public class GamePanel extends JPanel implements Runnable {
     final int FPS = 60;
     final int NANO_SEC = 1_000_000_000;
     final int MILLI_SEC = 1_000;
+    // Scale settings
+    final int SCALE_IMAGE = 4;
     KeyHandler keyboard = new KeyHandler();
     Thread gameThread;
     public static GameData gameData;
 
+    /**
+     * Initializes the game panel with its dimensions, background color, and key listener.
+     * */
     public GamePanel() {
         // Set the preferred size of the panel
         this.setPreferredSize(new Dimension(PANEL_WIDTH, PANEL_HEIGHT));
@@ -34,6 +39,9 @@ public class GamePanel extends JPanel implements Runnable {
         gameThread.start();
     }
 
+    /**
+     * The main game loop that updates the game state and renders the graphics at a consistent frame rate.
+     * */
     @Override
     public void run() {
         double drawInterval = (double) NANO_SEC / FPS;  // Time per frame in nanoseconds
@@ -56,10 +64,16 @@ public class GamePanel extends JPanel implements Runnable {
         }
     }
 
+    /**
+     * Updates the game state, including player movement, enemy behavior, and other game logic.
+     * */
     public void update() {
 
     }
 
+    /**
+     * Render the components with override codes from the original method
+     * */
     @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);

@@ -19,6 +19,7 @@ public class Entity implements Serializable {
                                     // This value only affects which image to use, not the actual movement direction
     public ArrayList<BufferedImage> leftImages;
     public ArrayList<BufferedImage> rightImages;
+    public GamePanel gamePanel;
 
     /**
      * Initializes the entity with its position, hitbox dimensions, and movement parameters.
@@ -28,7 +29,8 @@ public class Entity implements Serializable {
      * @param hitboxHeight the height of the entity's hitbox
      * @param maxSpeed the maximum speed the entity can reach
      * */
-    public Entity(int x, int y, int hitboxWidth, int hitboxHeight, double maxSpeed) {
+    public Entity(int x, int y, int hitboxWidth, int hitboxHeight, double maxSpeed, GamePanel gamePanel) {
+        this.gamePanel = gamePanel;
         this.x = x;
         this.y = y;
         this.hitboxWidth = hitboxWidth;
@@ -46,55 +48,72 @@ public class Entity implements Serializable {
     }
 
     /**
+     * Converts String paths to image ArrayList
+     *
+     * @param paths the list of image paths to load
+     * @return an ArrayList of BufferedImages loaded from the provided paths
+     * */
+    public ArrayList<BufferedImage> pathsToImages(ArrayList<String> paths) {
+        ArrayList<BufferedImage> images = new ArrayList<>();
+        if (paths != null) {
+            for (String path : paths) {
+                if (path == null) continue;
+                try {
+                    BufferedImage img = ImageIO.read(getClass().getResourceAsStream(path));
+                    images.add(img);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return images;
+    }
+
+    /**
      * Load images from file paths and populate leftImages and rightImages lists.
      * If any image fails to load it will be skipped.
+     *
      * @param leftImagePaths  paths to left-facing images
      * @param rightImagePaths paths to right-facing images
      */
     public void setUpImagesFromPaths(ArrayList<String> leftImagePaths, ArrayList<String> rightImagePaths) {
         this.leftImages = new ArrayList<>();
         this.rightImages = new ArrayList<>();
-
-        if (leftImagePaths != null) {
-            for (String path : leftImagePaths) {
-                if (path == null) continue;
-                try {
-                    BufferedImage img = ImageIO.read(new File(path));
-                    if (img != null) this.leftImages.add(img);
-                } catch (IOException e) {
-                    System.err.println("Failed to load left image: " + path + " -> " + e.getMessage());
-                }
-            }
-        }
-
-        if (rightImagePaths != null) {
-            for (String path : rightImagePaths) {
-                if (path == null) continue;
-                try {
-                    BufferedImage img = ImageIO.read(new File(path));
-                    if (img != null) this.rightImages.add(img);
-                } catch (IOException e) {
-                    System.err.println("Failed to load right image: " + path + " -> " + e.getMessage());
-                }
-            }
-        }
-
+        leftImages = pathsToImages(leftImagePaths);
+        rightImages = pathsToImages(rightImagePaths);
         // ensure imgIndex is valid
-        if (imgIndex < 0) imgIndex = 0;
-        if (isFacingLeft && this.leftImages.size() == 0) imgIndex = 0;
-        if (!isFacingLeft && this.rightImages.size() == 0) imgIndex = 0;
+        if (imgIndex < 0) {
+            imgIndex = 0;
+        }
+        if (isFacingLeft && this.leftImages.isEmpty()) {
+            imgIndex = 0;
+        }
+        if (!isFacingLeft && this.rightImages.isEmpty()) {
+            imgIndex = 0;
+        }
     }
 
+    /**
+     * Returns a duplicate of the entity with the same position, hitbox dimensions, movement parameters, and images.
+     * */
     public Entity duplicate() {
-        Entity duplicate = new Entity(x, y, hitboxWidth, hitboxHeight, maxSpeed);
+        Entity duplicate = new Entity(x, y, hitboxWidth, hitboxHeight, maxSpeed, gamePanel);
         duplicate.setUpImages(leftImages, rightImages);
         return duplicate;
     }
 
+    /**
+     * Updates the in-game behavior (Movement, animation, etc.) of the entity.
+     * */
     public void update() {
 
     }
 
+    /**
+     * Renders the entity on the screen using the appropriate image based on its facing direction and scale factor
+     *
+     * @param g2 the Graphics2D object used for drawing the entity on the screen
+     * */
     public void render(Graphics2D g2) {
         BufferedImage img;
         if (isFacingLeft) {

@@ -21,8 +21,9 @@ public class Mountable extends Entity {
      * @param maxStamina the maximum stamina of the mountable entity, determines how long it can be ridden before
      *                   needing to rest
      * */
-    public Mountable(int x, int y, int hitboxWidth, int hitboxHeight, double maxSpeed, int maxStamina) {
-        super(x, y, hitboxWidth, hitboxHeight, maxSpeed);
+    public Mountable(int x, int y, int hitboxWidth, int hitboxHeight, double maxSpeed, int maxStamina,
+                     GamePanel gamePanel) {
+        super(x, y, hitboxWidth, hitboxHeight, maxSpeed, gamePanel);
         this.isMounted = false;
         this.MAX_STAMINA = maxStamina;
         this.stamina = maxStamina;

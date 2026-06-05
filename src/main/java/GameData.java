@@ -1,4 +1,4 @@
-import java.io.Serializable;
+import java.io.*;
 import java.util.ArrayList;
 
 public class GameData implements Serializable {
@@ -39,10 +39,33 @@ public class GameData implements Serializable {
 
     public GameData(KeyHandler keyHandler, GamePanel gamePanel) {
         Mountable originHorse = new Mountable(
-                600, 280, 100, 100, 5.0, 100
+                600, 280, 100, 100, 5.0, 100, gamePanel
         );
         player = new Player(keyHandler, gamePanel, originHorse);
     }
 
+    /**
+     * Outputs the serialized objects to a specified file path
+     *
+     * @param filePath the path to save the game data file
+     * */
+    public void saveGame(String filePath) throws IOException {
+        FileOutputStream fileOut = new FileOutputStream(filePath);
+        ObjectOutputStream objOut = new ObjectOutputStream(fileOut);
+        objOut.writeObject(this);
+        objOut.close();
+    }
 
+    /**
+     * Loads the game data from a specified file path and updates the current game state accordingly
+     *
+     * @param filePath the path to load the game data file from
+     * */
+    public Object loadGame(String filePath) throws IOException, ClassNotFoundException {
+        FileInputStream fileIn = new FileInputStream(filePath);
+        ObjectInputStream objIn = new ObjectInputStream(fileIn);
+        Object loadedData = objIn.readObject();
+        objIn.close();
+        return loadedData;
+    }
 }

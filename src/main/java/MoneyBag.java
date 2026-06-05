@@ -9,11 +9,21 @@ public class MoneyBag implements Serializable {
     public final int capacity;
     public BufferedImage image;
 
+    /**
+     * Initializes the money bag with a specified capacity and an empty list of coins.
+     *
+     * @param capacity the maximum number of coins the money bag can hold
+     * */
     public MoneyBag(int capacity) {
         this.capacity = capacity;
         this.coins = new ArrayList<Item>(capacity);
     }
 
+    /**
+     * Sets the image of the money bag based on the provided file path.
+     *
+     * @param path the image path
+     * */
     public void setImage(String path) {
         try {
             image = ImageIO.read(new File(path));
@@ -22,12 +32,22 @@ public class MoneyBag implements Serializable {
         }
     }
 
+    /**
+     * Adds a coin to the bag
+     *
+     * @param coin the coin to be added
+     * */
     public void addCoin(Item coin) {
         if (coin.id == GameData.ID.COIN_ID) {
             coins.add(coin);
         }
     }
 
+    /**
+     * Toss one coin from the bag
+     *
+     * @return the coin that is removed
+     * */
     public Item tossCoin() {
         if (!coins.isEmpty()) {
             Item coin = coins.remove(coins.size() - 1);

@@ -3,8 +3,9 @@ public class UpgradableStruct extends ContainerStruct {
     public final String[] LEVEL_IMG_PATH;
     public int priceLvlUp;
 
-    public UpgradableStruct(int x, int y, String[] levelImgPath, GameData.ID id, int[][] relativePos) {
-        super(x, y, 0, 0, 0, id, relativePos);
+    public UpgradableStruct(int x, int y, String[] levelImgPath, GameData.ID id, int[][] relativePos,
+                            GamePanel gamePanel) {
+        super(x, y, 0, 0, 0, id, relativePos, gamePanel);
         LEVEL_IMG_PATH = levelImgPath;
         level = 0;
         priceLvlUp = 1;

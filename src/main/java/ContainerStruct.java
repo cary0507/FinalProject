@@ -2,12 +2,20 @@ public class ContainerStruct extends Structure {
     public Entity[] containing;
     public int[][] relativePos;  // Stored x and y positions to anchor entities to the structure
 
-    public ContainerStruct(int x, int y, int width, int height, int maxHP, GameData.ID id, int[][] relativePos) {
-        super(x, y, width, height, maxHP, id);
+    /**
+     * Initializes the structure with its position, hitbox dimensions, health points, and the entities it contains.
+     * */
+    public ContainerStruct(int x, int y, int width, int height, int maxHP, GameData.ID id, int[][] relativePos,
+                           GamePanel gamePanel) {
+        super(x, y, width, height, maxHP, id, gamePanel);
         this.relativePos = relativePos;
         this.containing = new Entity[relativePos.length];
     }
 
+    /**
+     * Anchors the contained ordered entities to the structure by updating their positions based on the structure's
+     * current position and their relative positions.
+     * */
     public void anchorEntities() {
         for (int i = 0; i < containing.length; i++) {
             if (containing[i] != null) {
@@ -17,6 +25,12 @@ public class ContainerStruct extends Structure {
         }
     }
 
+    /**
+     * Take away the Entity at the specified index from the structure, returning a duplicate of it and setting the
+     * original reference to null.
+     *
+     * @param index the index of the entity to be taken away from the structure
+     * */
     public Entity takeAway(int index) {
         Entity taken = this.containing[index].duplicate();
         containing[index] = null;
