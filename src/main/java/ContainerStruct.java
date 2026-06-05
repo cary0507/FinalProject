@@ -1,6 +1,6 @@
 public class ContainerStruct extends Structure {
     public Entity[] containing;
-    public int[][] relativePos;
+    public int[][] relativePos;  // Stored x and y positions to anchor entities to the structure
 
     public ContainerStruct(int x, int y, int width, int height, int maxHP, GameData.ID id, int[][] relativePos) {
         super(x, y, width, height, maxHP, id);
@@ -19,7 +19,7 @@ public class ContainerStruct extends Structure {
 
     public Entity takeAway(int index) {
         Entity taken = this.containing[index].duplicate();
-        this.containing[index] = null;
+        containing[index] = null;
         return taken;
     }
 }

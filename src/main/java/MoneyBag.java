@@ -1,15 +1,25 @@
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;
 
 public class MoneyBag implements Serializable {
     private final ArrayList<Item> coins;
     public final int capacity;
-    public String imagePath;
+    public BufferedImage image;
 
-    public MoneyBag(int capacity, String imagePath) {
+    public MoneyBag(int capacity) {
         this.capacity = capacity;
         this.coins = new ArrayList<Item>(capacity);
-        this.imagePath = imagePath;
+    }
+
+    public void setImage(String path) {
+        try {
+            image = ImageIO.read(new File(path));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public void addCoin(Item coin) {

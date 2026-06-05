@@ -12,9 +12,8 @@ public class Human extends Entity {
      * @param hitboxHeight the height of the entity's hitbox
      * @param maxSpeed     the maximum speed the entity can reach
      */
-    public Human(int x, int y, int hitboxWidth, int hitboxHeight, double maxSpeed, Structure habitat,
-                 String imagePath) {
-        super(x, y, hitboxWidth, hitboxHeight, maxSpeed, imagePath);
+    public Human(int x, int y, int hitboxWidth, int hitboxHeight, double maxSpeed, Structure habitat) {
+        super(x, y, hitboxWidth, hitboxHeight, maxSpeed);
         this.id = GameData.ID.FUGITIVE_ID;
         this.habitat = habitat;
     }

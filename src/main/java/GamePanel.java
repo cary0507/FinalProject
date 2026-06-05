@@ -9,7 +9,7 @@ import java.awt.*;
 public class GamePanel extends JPanel implements Runnable {
     // Environment settings
     final int PANEL_WIDTH = 1200;
-    final int PANEL_HEIGHT = 800;
+    final int PANEL_HEIGHT = 840;
     final int HORIZON = PANEL_HEIGHT - 300;
     final int FPS = 60;
     final int NANO_SEC = 1_000_000_000;

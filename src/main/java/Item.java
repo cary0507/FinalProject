@@ -32,6 +32,10 @@ public class Item extends Projectile {
         this.id = id;
     }
 
+    /**
+     * Creates a duplicate of this Item instance, copying all properties including position, hitbox dimensions,
+     * movement parameters, and the picked-up state.
+     * */
     public Item duplicate() {
         Item cloned = new Item(
                 this.x, this.y, this.hitboxWidth, this.hitboxHeight, this.maxSpeed,
