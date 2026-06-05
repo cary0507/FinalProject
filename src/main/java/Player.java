@@ -26,7 +26,7 @@ public class Player extends Entity {
                 gamePanel);
         mount.isMounted = true;
         mount.anchorsPassenger(this);  // Anchor the player to the mount's position
-        moneyBag = new MoneyBag(15);
+        moneyBag = new MoneyBag(15, x, y);
     }
 
     /**

@@ -8,15 +8,19 @@ public class MoneyBag implements Serializable {
     private final ArrayList<Item> coins;
     public final int capacity;
     public BufferedImage image;
+    public int dropX;
+    public int dropY;
 
     /**
      * Initializes the money bag with a specified capacity and an empty list of coins.
      *
      * @param capacity the maximum number of coins the money bag can hold
      * */
-    public MoneyBag(int capacity) {
+    public MoneyBag(int capacity, int dropX, int dropY) {
         this.capacity = capacity;
         this.coins = new ArrayList<Item>(capacity);
+        this.dropX = dropX;
+        this.dropY = dropY;
     }
 
     /**
@@ -33,13 +37,17 @@ public class MoneyBag implements Serializable {
     }
 
     /**
-     * Adds a coin to the bag
+     * Adds a coin to the bag and has a 50% chance to drop it to the water when reached max capacity
      *
      * @param coin the coin to be added
      * */
     public void addCoin(Item coin) {
         if (coin.id == GameData.ID.COIN_ID) {
-            coins.add(coin);
+            if (coins.size() < capacity) {
+                coins.add(coin);
+            } else {
+
+            }
         }
     }
 
