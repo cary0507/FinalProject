@@ -40,10 +40,10 @@ public class Mountable extends Entity {
      * @param yOffsetR the vertical offset for the passenger when the mount is facing right
      * */
     public void setPassengerOffset(int xOffsetL, int yOffsetL, int xOffsetR, int yOffsetR) {
-        passengerXOffsetL = xOffsetL;
-        passengerYOffsetL = yOffsetL;
-        passengerXOffsetR = xOffsetR;
-        passengerYOffsetR = yOffsetR;
+        passengerXOffsetL = xOffsetL * gamePanel.SCALE_IMAGE;
+        passengerYOffsetL = yOffsetL * gamePanel.SCALE_IMAGE;
+        passengerXOffsetR = xOffsetR * gamePanel.SCALE_IMAGE;
+        passengerYOffsetR = yOffsetR * gamePanel.SCALE_IMAGE;
     }
 
     /**
@@ -54,10 +54,10 @@ public class Mountable extends Entity {
     public void anchorsPassenger(Entity passenger) {
         if (isFacingLeft) {
             passenger.x = x + passengerXOffsetL;
-            passenger.y = y + passengerYOffsetL;
+            passenger.y = y - passengerYOffsetL;
         } else {
             passenger.x = x + passengerXOffsetR;
-            passenger.y = y + passengerYOffsetR;
+            passenger.y = y - passengerYOffsetR;
         }
     }
 }

@@ -79,10 +79,13 @@ public class GameData implements Serializable {
         );
         originHorse.y -= originHorse.hitboxHeight;
         originHorse.setImagesFromPaths(brownHorseImgL, brownHorseImgR);
+        originHorse.setPassengerOffset(14, 7, 12, 7);
         allMounts.add(originHorse);
         // Setup player
         player = new Player(keyHandler, gamePanel, originHorse);
         player.setImagesFromPaths(playerImgL, playerImgR);
+        player.setCrownOffset(3, 2, 8, 2);
+        player.anchorsCrown();
         player.crown.setImagesFromPaths(crownImgL, crownImgR);
     }
 

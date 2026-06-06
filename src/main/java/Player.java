@@ -38,10 +38,10 @@ public class Player extends Entity {
      * @param yOffsetR the vertical offset for the crown when facing right
      * */
     public void setCrownOffset(int xOffsetL, int yOffsetL, int xOffsetR, int yOffsetR) {
-        crownXOffsetL = xOffsetL;
-        crownYOffsetL = yOffsetL;
-        crownXOffsetR = xOffsetR;
-        crownYOffsetR = yOffsetR;
+        crownXOffsetL = xOffsetL * gamePanel.SCALE_IMAGE;
+        crownYOffsetL = yOffsetL * gamePanel.SCALE_IMAGE;
+        crownXOffsetR = xOffsetR * gamePanel.SCALE_IMAGE;
+        crownYOffsetR = yOffsetR * gamePanel.SCALE_IMAGE;
     }
 
     /**
@@ -50,10 +50,10 @@ public class Player extends Entity {
     public void anchorsCrown() {
         if (isFacingLeft) {
             crown.x = x + crownXOffsetL;
-            crown.y = y + crownYOffsetL;
+            crown.y = y - crownYOffsetL;
         } else {
             crown.x = x + crownXOffsetR;
-            crown.y = y + crownYOffsetR;
+            crown.y = y - crownYOffsetR;
         }
     }
 
@@ -103,12 +103,20 @@ public class Player extends Entity {
             mount.x -= (int) mount.maxSpeed;
             mount.anchorsPassenger(this);   // Update the player's position to follow the mount
             anchorsCrown();
-        } else if (keyInput.rightPressed) {
+        }
+        if (keyInput.rightPressed) {
             isFacingLeft = false;
             mount.isFacingLeft = false;
             mount.x += (int) mount.maxSpeed;
             mount.anchorsPassenger(this);
             anchorsCrown();
         }
+    }
+
+    @Override
+    public void render(Graphics2D g2) {
+        mount.render(g2);
+        super.render(g2);
+        crown.render(g2);
     }
 }
