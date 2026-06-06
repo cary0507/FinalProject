@@ -2,7 +2,7 @@ import java.io.*;
 import java.util.ArrayList;
 
 public class GameData implements Serializable {
-    @Serial
+    // serialVersionUID for Serializable compatibility (no @Serial annotation to keep Java 8 compatibility)
     private static final long serialVersionUID = 1L;
     public static final double GRAVITY = 9.8;
     // Image paths
