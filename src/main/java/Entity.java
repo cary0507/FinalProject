@@ -137,13 +137,15 @@ public class Entity implements Serializable {
      *
      * @param g2 the Graphics2D object used for drawing the entity on the screen
      * */
-    public void render(Graphics2D g2) {
+    public void render(Graphics2D g2, Camera referenceCam) {
         BufferedImage img;
         if (isFacingLeft) {
             img = leftImages[imgIndex];
         } else {
             img = rightImages[imgIndex];
         }
-        g2.drawImage(img, x, y, hitboxWidth, hitboxHeight, null);
+        int screenX = referenceCam.convertX(this.x);
+        int screenY = referenceCam.convertY(this.y);
+        g2.drawImage(img, screenX, screenY, hitboxWidth, hitboxHeight, null);
     }
 }

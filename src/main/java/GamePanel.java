@@ -80,7 +80,7 @@ public class GamePanel extends JPanel implements Runnable {
         Graphics2D g2 = (Graphics2D) g;
         g2.setColor(Color.GREEN);
         g2.fillRect(0, HORIZON, PANEL_WIDTH, PANEL_HEIGHT - HORIZON);
-        gameData.player.render(g2);
+        gameData.player.render(g2, gameData.camera);
         // Dispose of the graphics context to free up resources
         g2.dispose();
     }

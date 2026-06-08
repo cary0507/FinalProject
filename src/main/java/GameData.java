@@ -51,6 +51,8 @@ public class GameData implements Serializable {
         HAMMER_SHELF_ID
     }
     // Objects
+    public GamePanel gamePanel;
+    public Camera camera;
     public Player player;
     public ArrayList<Item> allItems;
     public ArrayList<Human> allHumans;
@@ -66,12 +68,15 @@ public class GameData implements Serializable {
      * @param gamePanel the GamePanel object of main screen
      * */
     public GameData(KeyHandler keyHandler, GamePanel gamePanel) {
+        this.gamePanel = gamePanel;
         allItems = new ArrayList<>();
         allHumans = new ArrayList<>();
         allStructures = new ArrayList<>();
         allEnemies = new ArrayList<>();
         allProjectiles = new ArrayList<>();
         allMounts = new ArrayList<>();
+        // Setup camera
+        camera = new Camera(gamePanel, 0, 0, 40);
         // Setup default horse
         Mountable originHorse = new Mountable(
                 (int) (GamePanel.PANEL_WIDTH / 2),
@@ -114,6 +119,16 @@ public class GameData implements Serializable {
         return loadedData;
     }
 
+    public static boolean isInside(int left1, int top1, int right1, int bottom1,
+                                   int left2, int top2, int right2, int bottom2) {
+        if (right1 >= left2 && left1 <= right2) {
+            if (bottom1 >= top1 && top1 <= bottom2) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public static boolean isInside(Entity obj1, Entity obj2) {
         if (obj1 == obj2) {  // Same object
             return true;
@@ -122,11 +137,6 @@ public class GameData implements Serializable {
         int right2 = obj2.x + obj2.hitboxHeight;
         int bottom1 = obj1.y + obj1.hitboxHeight;
         int bottom2 = obj2.y + obj2.hitboxHeight;
-        if (right1 >= obj2.x && obj1.x <= right2) {
-            if (bottom1 >= obj2.y && obj1.y <= bottom2) {
-                return true;
-            }
-        }
-        return false;
+        return isInside(obj1.x, obj1.y, right1, bottom1, obj2.x, obj2.y, right2, bottom2);
     }
 }

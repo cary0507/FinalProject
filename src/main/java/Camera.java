@@ -50,6 +50,29 @@ public class Camera implements Serializable {
         int freeTop = y + deadZoneLength;
         int freeRight = right - deadZoneLength;
         int freeBottom = bottom - deadZoneLength;
-        return false;
+        return GameData.isInside(freeLeft, freeTop, freeRight, freeBottom, actualX, actualY, actualX, actualY);
+    }
+
+    public void focusOn(Entity mainFocus) {
+        int right = x + this.width;
+        int bottom = y + this.height;
+        int freeLeft = x + deadZoneLength;
+        int freeTop = y + deadZoneLength;
+        int freeRight = right - deadZoneLength;
+        int freeBottom = bottom - deadZoneLength;
+        int mainFocusRight = mainFocus.x + mainFocus.hitboxWidth;
+        int mainFocusBottom = mainFocus.y + mainFocus.hitboxHeight;
+        if (mainFocus.x < freeLeft) {
+            this.x = mainFocus.x - deadZoneLength;
+        }
+        if (mainFocus.y < freeTop) {
+            this.y = mainFocus.y - deadZoneLength;
+        }
+        if (mainFocusRight > freeRight) {
+            this.x = mainFocusRight + deadZoneLength - this.width;
+        }
+        if (mainFocusBottom > freeBottom) {
+            this.y = mainFocusBottom + deadZoneLength - this.height;
+        }
     }
 }

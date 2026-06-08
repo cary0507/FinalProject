@@ -113,9 +113,9 @@ public class Player extends Entity {
     }
 
     @Override
-    public void render(Graphics2D g2) {
-        mount.render(g2);
-        super.render(g2);
-        crown.render(g2);
+    public void render(Graphics2D g2, Camera referenceCam) {
+        mount.render(g2, referenceCam);
+        super.render(g2, referenceCam);
+        crown.render(g2, referenceCam);
     }
 }
