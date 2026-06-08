@@ -58,7 +58,9 @@ public class Structure extends Entity {
     }
 
     @Override
-    public void render(Graphics2D g2) {
-        g2.drawImage(image, x, y, hitboxWidth, hitboxHeight, null);
+    public void render(Graphics2D g2, Camera referenceCam) {
+        int screenX = referenceCam.convertX(this.x);
+        int screenY = referenceCam.convertY(this.y);
+        g2.drawImage(image, x, y, screenX, screenY, null);
     }
 }

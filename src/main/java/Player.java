@@ -95,7 +95,7 @@ public class Player extends Entity {
         // Update player's actions based on key inputs while mounted
         if (keyInput.downPressed) {
             Item tossedCoin = moneyBag.tossCoin();
-            GamePanel.gameData.allItems.add(tossedCoin);
+            gamePanel.gameData.allItems.add(tossedCoin);
         }
         if (keyInput.leftPressed) {
             isFacingLeft = true;
@@ -114,6 +114,7 @@ public class Player extends Entity {
 
     @Override
     public void render(Graphics2D g2, Camera referenceCam) {
+        referenceCam.focusOn(this);
         mount.render(g2, referenceCam);
         super.render(g2, referenceCam);
         crown.render(g2, referenceCam);

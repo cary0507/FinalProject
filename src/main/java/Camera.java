@@ -5,7 +5,8 @@ public class Camera implements Serializable {
     public int y;
     public int width;
     public int height;
-    public int deadZoneLength;
+    public int deadZoneWidth;
+    public int deadZoneHeight;
     GamePanel gamePanel;
 
     /**
@@ -14,15 +15,17 @@ public class Camera implements Serializable {
      * @param gamePanel the screen that is being tracked by the camera
      * @param x left of the camera
      * @param y top of the camera
-     * @param deadZoneLength the length of the dead zone (Main target will never appear inside)
+     * @param deadZoneWidth the height of the dead zone (Main target will never appear inside)
+     * @param deadZoneHeight the width of the dead zone
      * */
-    public Camera(GamePanel gamePanel, int x, int y, int deadZoneLength) {
+    public Camera(GamePanel gamePanel, int x, int y, int deadZoneWidth, int deadZoneHeight) {
         this.gamePanel = gamePanel;
         this.x = x;
         this.y = y;
-        this.width = gamePanel.getWidth();
-        this.height = gamePanel.getHeight();
-        this.deadZoneLength = deadZoneLength;
+        this.width = gamePanel.PANEL_WIDTH;
+        this.height = gamePanel.PANEL_HEIGHT;
+        this.deadZoneWidth = deadZoneWidth;
+        this.deadZoneHeight = deadZoneHeight;
     }
 
     /**
@@ -43,36 +46,31 @@ public class Camera implements Serializable {
         return actualY - y;
     }
 
-    public boolean isInFreeZone(int actualX, int actualY) {
-        int right = x + width;
-        int bottom = y + height;
-        int freeLeft = x + deadZoneLength;
-        int freeTop = y + deadZoneLength;
-        int freeRight = right - deadZoneLength;
-        int freeBottom = bottom - deadZoneLength;
-        return GameData.isInside(freeLeft, freeTop, freeRight, freeBottom, actualX, actualY, actualX, actualY);
-    }
-
+    /**
+     * Warps the main focus Entity inside the free moving zone
+     *
+     * @param mainFocus the Entity to be focused on
+     * */
     public void focusOn(Entity mainFocus) {
         int right = x + this.width;
         int bottom = y + this.height;
-        int freeLeft = x + deadZoneLength;
-        int freeTop = y + deadZoneLength;
-        int freeRight = right - deadZoneLength;
-        int freeBottom = bottom - deadZoneLength;
+        int freeLeft = x + deadZoneWidth;
+        int freeTop = y + deadZoneHeight;
+        int freeRight = right - deadZoneWidth;
+        int freeBottom = bottom - deadZoneHeight;
         int mainFocusRight = mainFocus.x + mainFocus.hitboxWidth;
         int mainFocusBottom = mainFocus.y + mainFocus.hitboxHeight;
         if (mainFocus.x < freeLeft) {
-            this.x = mainFocus.x - deadZoneLength;
+            this.x = mainFocus.x - deadZoneWidth;
         }
         if (mainFocus.y < freeTop) {
-            this.y = mainFocus.y - deadZoneLength;
+            this.y = mainFocus.y - deadZoneHeight;
         }
         if (mainFocusRight > freeRight) {
-            this.x = mainFocusRight + deadZoneLength - this.width;
+            this.x = mainFocusRight + deadZoneWidth - this.width;
         }
         if (mainFocusBottom > freeBottom) {
-            this.y = mainFocusBottom + deadZoneLength - this.height;
+            this.y = mainFocusBottom + deadZoneHeight - this.height;
         }
     }
 }

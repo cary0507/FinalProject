@@ -8,9 +8,9 @@ import java.awt.*;
 
 public class GamePanel extends JPanel implements Runnable {
     // Environment settings
-    public final static int PANEL_WIDTH = 1200;
-    public final static int PANEL_HEIGHT = 840;
-    public final static int HORIZON = PANEL_HEIGHT - 300;
+    public final int PANEL_WIDTH = 1200;
+    public final int PANEL_HEIGHT = 840;
+    public final int HORIZON = PANEL_HEIGHT - 300;
     final int FPS = 60;
     final int NANO_SEC = 1_000_000_000;
     final int MILLI_SEC = 1_000;
@@ -18,7 +18,7 @@ public class GamePanel extends JPanel implements Runnable {
     final int SCALE_IMAGE = 4;
     KeyHandler keyboard = new KeyHandler();
     Thread gameThread;
-    public static GameData gameData;
+    public GameData gameData;
 
     /**
      * Initializes the game panel with its dimensions, background color, and key listener.
@@ -79,7 +79,7 @@ public class GamePanel extends JPanel implements Runnable {
         super.paintComponent(g);
         Graphics2D g2 = (Graphics2D) g;
         g2.setColor(Color.GREEN);
-        g2.fillRect(0, HORIZON, PANEL_WIDTH, PANEL_HEIGHT - HORIZON);
+        g2.fillRect(gameData.camera.convertX(0), HORIZON, PANEL_WIDTH, PANEL_HEIGHT - HORIZON);
         gameData.player.render(g2, gameData.camera);
         // Dispose of the graphics context to free up resources
         g2.dispose();

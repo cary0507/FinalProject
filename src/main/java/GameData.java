@@ -76,11 +76,11 @@ public class GameData implements Serializable {
         allProjectiles = new ArrayList<>();
         allMounts = new ArrayList<>();
         // Setup camera
-        camera = new Camera(gamePanel, 0, 0, 40);
+        camera = new Camera(gamePanel, 0, 0, 400, 100);
         // Setup default horse
         Mountable originHorse = new Mountable(
-                (int) (GamePanel.PANEL_WIDTH / 2),
-                GamePanel.HORIZON, 43, 29, 5.0, 100, gamePanel
+                (int) (gamePanel.PANEL_WIDTH / 2),
+                gamePanel.HORIZON, 43, 29, 5.0, 100, gamePanel
         );
         originHorse.y -= originHorse.hitboxHeight;
         originHorse.setImagesFromPaths(brownHorseImgL, brownHorseImgR);
@@ -119,10 +119,13 @@ public class GameData implements Serializable {
         return loadedData;
     }
 
+    /**
+     * Check if
+     * */
     public static boolean isInside(int left1, int top1, int right1, int bottom1,
                                    int left2, int top2, int right2, int bottom2) {
         if (right1 >= left2 && left1 <= right2) {
-            if (bottom1 >= top1 && top1 <= bottom2) {
+            if (bottom1 >= top2 && top1 <= bottom2) {
                 return true;
             }
         }
