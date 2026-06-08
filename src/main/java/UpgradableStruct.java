@@ -35,8 +35,8 @@ public class UpgradableStruct extends ContainerStruct {
         priceLvlUp *= 3;
         maxHP = 5 + 5 * (this.level - 1);
         curHP = this.maxHP;
-        width = newWidth;
-        height = newHeight;
+        hitboxWidth = newWidth;
+        hitboxHeight = newHeight;
         setImage(this.LEVEL_IMG_PATH[this.level]);
     }
 }

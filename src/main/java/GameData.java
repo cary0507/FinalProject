@@ -113,4 +113,20 @@ public class GameData implements Serializable {
         objIn.close();
         return loadedData;
     }
+
+    public static boolean isInside(Entity obj1, Entity obj2) {
+        if (obj1 == obj2) {  // Same object
+            return true;
+        }
+        int right1 = obj1.x + obj1.hitboxHeight;
+        int right2 = obj2.x + obj2.hitboxHeight;
+        int bottom1 = obj1.y + obj1.hitboxHeight;
+        int bottom2 = obj2.y + obj2.hitboxHeight;
+        if (right1 >= obj2.x && obj1.x <= right2) {
+            if (bottom1 >= obj2.y && obj1.y <= bottom2) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

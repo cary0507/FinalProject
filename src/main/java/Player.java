@@ -103,8 +103,7 @@ public class Player extends Entity {
             mount.x -= (int) mount.maxSpeed;
             mount.anchorsPassenger(this);   // Update the player's position to follow the mount
             anchorsCrown();
-        }
-        if (keyInput.rightPressed) {
+        } else if (keyInput.rightPressed) {
             isFacingLeft = false;
             mount.isFacingLeft = false;
             mount.x += (int) mount.maxSpeed;

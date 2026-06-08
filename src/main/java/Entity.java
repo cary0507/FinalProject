@@ -10,8 +10,8 @@ public class Entity implements Serializable {
     // The pixels on the screen has to be a whole number, hence the int type.
     public int x;
     public int y;
-    public final int hitboxWidth;
-    public final int hitboxHeight;
+    public int hitboxWidth;
+    public int hitboxHeight;
     // Stores image files
     public boolean isFacingLeft;    // Since it's a 2D game and there's only left and right
                                     // This value only affects which image to use, not the actual movement direction
