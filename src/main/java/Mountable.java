@@ -40,10 +40,10 @@ public class Mountable extends Entity {
      * @param yOffsetR the vertical offset for the passenger when the mount is facing right
      * */
     public void setPassengerOffset(int xOffsetL, int yOffsetL, int xOffsetR, int yOffsetR) {
-        passengerXOffsetL = xOffsetL * gamePanel.SCALE_IMAGE;
-        passengerYOffsetL = yOffsetL * gamePanel.SCALE_IMAGE;
-        passengerXOffsetR = xOffsetR * gamePanel.SCALE_IMAGE;
-        passengerYOffsetR = yOffsetR * gamePanel.SCALE_IMAGE;
+        passengerXOffsetL = xOffsetL * gamePanel.SCALE_FACTOR;
+        passengerYOffsetL = yOffsetL * gamePanel.SCALE_FACTOR;
+        passengerXOffsetR = xOffsetR * gamePanel.SCALE_FACTOR;
+        passengerYOffsetR = yOffsetR * gamePanel.SCALE_FACTOR;
     }
 
     /**

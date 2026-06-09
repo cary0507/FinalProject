@@ -1,3 +1,5 @@
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.ArrayList;
 
@@ -24,6 +26,11 @@ public class GameData implements Serializable {
     public static String[] brownHorseImgR = {
             "/raw images/brown horse right.png",
     };
+    public static String[] chunksImg = {
+            "/raw images/bare dirt.png",
+            "/raw images/bare dirt.png",
+            "/raw images/Plain.png"
+    };
     // Object IDs
     public enum ID {
         // Item's ID
@@ -38,6 +45,8 @@ public class GameData implements Serializable {
         BUILDER_ID,
         BANKER_ID,
         // Structure's ID
+        DIRT_ID,
+        PLAIN_ID,
         HEADQUARTER_ID,
         TREE_ID,
         GRASS_ID,
@@ -92,6 +101,46 @@ public class GameData implements Serializable {
     }
 
     /**
+     * Randomize an array of numerical code representing the types of chunks
+     * Number 0 is always the spawn chunk at the center of map
+     *
+     * @param landRadius the number of chunks from left/right side of the spawn chunk
+     * @param numChunkOptions the total number of variations of chunks (Always >= 1)
+     * @return the codes stored in an int array
+     * */
+    public int[] getLandCode(int landRadius, int numChunkOptions) {
+        int totalChunks = landRadius * 2 + 1;
+        int[] landCode = new int[totalChunks];
+        int mid = (int) ((landRadius - 1) / 2);  // Explicit is better than implicit
+        for (int i = 0; i < landCode.length; i++) {
+            if (i != mid) {
+                int rand = (int) (Math.random() * (numChunkOptions) + 1);
+                landCode[i] = rand;
+            } else {
+                landCode[i] = 0;
+            }
+        }
+        return landCode;
+    }
+
+    public void parseLandCode(int[] landCode) {
+        int curX = 0;
+        for (int i  = 0; i < landCode.length; i++) {
+            BufferedImage img;
+            int code =  landCode[i];
+            if (code == 0) {
+                img = pathToImage(chunksImg[0]);
+                Structure spawnChunk = new Structure(
+                        curX, gamePanel.HORIZON - 1,
+                        img.getWidth(),img.getHeight() - 1, -1,
+                        ID.DIRT_ID, gamePanel
+                );
+                allStructures.add(spawnChunk);
+            }
+        }
+    }
+
+    /**
      * Outputs the serialized objects to a specified file path
      *
      * @param filePath the path to save the game data file
@@ -116,8 +165,19 @@ public class GameData implements Serializable {
         return loadedData;
     }
 
+    // Helper methods
     /**
-     * Check if
+     * Check if two rectangles are colliding
+     * 
+     * @param left1 the left x value of the first rectangle
+     * @param top1 the top y value of the first rectangle
+     * @param right1 the right x value of the first rectangle
+     * @param bottom1 the bottom y value of the first rectangle
+     * @param left2 the left x value of the second rectangle
+     * @param top2 the top y value of the second rectangle
+     * @param right2 the right x value of the second rectangle
+     * @param bottom2 the bottom y value of the second rectangle
+     * @return true if the rectangles are colliding, false otherwise
      * */
     public static boolean isInside(int left1, int top1, int right1, int bottom1,
                                    int left2, int top2, int right2, int bottom2) {
@@ -129,6 +189,13 @@ public class GameData implements Serializable {
         return false;
     }
 
+    /**
+     * Check if 2 Entity objects are colliding
+     * 
+     * @param obj1 the first Entity object
+     * @param obj2 the second Entity object
+     * @return true if the entities are colliding, false otherwise
+     * */
     public static boolean isInside(Entity obj1, Entity obj2) {
         if (obj1 == obj2) {  // Same object
             return true;
@@ -138,5 +205,59 @@ public class GameData implements Serializable {
         int bottom1 = obj1.y + obj1.hitboxHeight;
         int bottom2 = obj2.y + obj2.hitboxHeight;
         return isInside(obj1.x, obj1.y, right1, bottom1, obj2.x, obj2.y, right2, bottom2);
+    }
+
+    /**
+     * Converts path to BufferedImage
+     *
+     * @param path the path to an image (Must start with a "/")
+     * @return the BufferedImage, if exists
+     * */
+    public static BufferedImage pathToImage(String path) {
+        BufferedImage img;
+        try {
+            img = ImageIO.read(GameData.class.getResourceAsStream(path));
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+        return img;
+    }
+
+    /**
+     * Converts String paths to image array
+     *
+     * @param paths the array of image paths to load
+     * @return an array of BufferedImages loaded from the provided paths
+     * */
+    public static BufferedImage[] pathsToImages(String[] paths) {
+        if (paths == null) {
+            return new BufferedImage[0];
+        }
+
+        // Count valid paths
+        int imageCount = 0;
+        for (String path : paths) {
+            if (path != null) {
+                try {
+                    BufferedImage img = ImageIO.read(GameData.class.getResourceAsStream(path));
+                    if (img != null) {
+                        imageCount++;
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        // Store valid images
+        BufferedImage[] images = new BufferedImage[imageCount];
+        int index = 0;
+        for (String path : paths) {
+            if (path != null) {
+                images[index] = pathToImage(path);
+            }
+        }
+        return images;
     }
 }

@@ -15,7 +15,7 @@ public class GamePanel extends JPanel implements Runnable {
     final int NANO_SEC = 1_000_000_000;
     final int MILLI_SEC = 1_000;
     // Scale settings
-    final int SCALE_IMAGE = 4;
+    final int SCALE_FACTOR = 4;
     KeyHandler keyboard = new KeyHandler();
     Thread gameThread;
     public GameData gameData;

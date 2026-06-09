@@ -1,6 +1,6 @@
 public class UpgradableStruct extends ContainerStruct {
     public int level;
-    public final String[] LEVEL_IMG_PATH;
+    public final String[][] LEVEL_IMG_PATH;
     public int priceLvlUp;
 
     /**
@@ -13,7 +13,7 @@ public class UpgradableStruct extends ContainerStruct {
      * @param relativePos  relative inventory/slot positions (passed to parent)
      * @param gamePanel    reference to the GamePanel the structure belongs to
      */
-    public UpgradableStruct(int x, int y, String[] levelImgPath, GameData.ID id, int[][] relativePos,
+    public UpgradableStruct(int x, int y, String[][] levelImgPath, GameData.ID id, int[][] relativePos,
                             GamePanel gamePanel) {
         super(x, y, 0, 0, 0, id, relativePos, gamePanel);
         LEVEL_IMG_PATH = levelImgPath;
@@ -37,6 +37,5 @@ public class UpgradableStruct extends ContainerStruct {
         curHP = this.maxHP;
         hitboxWidth = newWidth;
         hitboxHeight = newHeight;
-        setImage(this.LEVEL_IMG_PATH[this.level]);
     }
 }

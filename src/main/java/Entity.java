@@ -1,6 +1,5 @@
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import javax.imageio.ImageIO;
@@ -25,62 +24,18 @@ public class Entity implements Serializable {
      * Initializes the entity with its position, hitbox dimensions, and movement parameters.
      * @param x the initial x-coordinate of the entity
      * @param y the initial y-coordinate of the entity
-     * @param imageWidth the width of the entity's image
-     * @param imageHeight the height of the entity's image
+     * @param hitboxWidth the width of the entity's image
+     * @param hitboxHeight the height of the entity's image
      * @param maxSpeed the maximum speed the entity can reach
      * */
-    public Entity(int x, int y, int imageWidth, int imageHeight, double maxSpeed, GamePanel gamePanel) {
+    public Entity(int x, int y, int hitboxWidth, int hitboxHeight, double maxSpeed, GamePanel gamePanel) {
         this.gamePanel = gamePanel;
         this.x = x;
         this.y = y;
-        this.hitboxWidth = imageWidth * gamePanel.SCALE_IMAGE;  // Scale up the image
-        this.hitboxHeight = imageHeight * gamePanel.SCALE_IMAGE;
+        this.hitboxWidth = hitboxWidth * gamePanel.SCALE_FACTOR;  // Scale up the image
+        this.hitboxHeight = hitboxHeight * gamePanel.SCALE_FACTOR;
         this.maxSpeed = maxSpeed;
         imgIndex = 0;
-    }
-
-    /**
-     * Converts String paths to image array
-     *
-     * @param paths the array of image paths to load
-     * @return an array of BufferedImages loaded from the provided paths
-     * */
-    public BufferedImage[] pathsToImages(String[] paths) {
-        if (paths == null) {
-            return new BufferedImage[0];
-        }
-
-        // Count valid paths
-        int imageCount = 0;
-        for (String path : paths) {
-            if (path != null) {
-                try {
-                    BufferedImage img = ImageIO.read(getClass().getResourceAsStream(path));
-                    if (img != null) {
-                        imageCount++;
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-
-        // Store valid images
-        BufferedImage[] images = new BufferedImage[imageCount];
-        int index = 0;
-        for (String path : paths) {
-            if (path != null) {
-                try {
-                    BufferedImage img = ImageIO.read(getClass().getResourceAsStream(path));
-                    if (img != null) {
-                        images[index++] = img;
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-        return images;
     }
 
     /**
@@ -91,8 +46,8 @@ public class Entity implements Serializable {
      * @param rightImagePaths paths to right-facing images
      */
     public void setImagesFromPaths(String[] leftImagePaths, String[] rightImagePaths) {
-        leftImages = pathsToImages(leftImagePaths);
-        rightImages = pathsToImages(rightImagePaths);
+        leftImages = GameData.pathsToImages(leftImagePaths);
+        rightImages = GameData.pathsToImages(rightImagePaths);
         // ensure imgIndex is valid
         if (imgIndex < 0) {
             imgIndex = 0;
@@ -129,7 +84,13 @@ public class Entity implements Serializable {
      * Updates the in-game behavior (Movement, animation, etc.) of the entity.
      * */
     public void update() {
-
+        if (isFacingLeft && imgIndex < leftImages.length - 1) {
+            imgIndex++;
+        } else if (!isFacingLeft && imgIndex < rightImages.length - 1) {
+            imgIndex++;
+        } else {
+            imgIndex = 0;
+        }
     }
 
     /**
@@ -146,6 +107,8 @@ public class Entity implements Serializable {
         }
         int screenX = referenceCam.convertX(this.x);
         int screenY = referenceCam.convertY(this.y);
-        g2.drawImage(img, screenX, screenY, hitboxWidth, hitboxHeight, null);
+        int onScreenWidth = img.getWidth() * gamePanel.SCALE_FACTOR;
+        int onScreenHeight = img.getHeight() * gamePanel.SCALE_FACTOR;
+        g2.drawImage(img, screenX, screenY, onScreenWidth, onScreenHeight, null);
     }
 }
