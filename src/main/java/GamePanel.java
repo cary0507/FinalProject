@@ -79,12 +79,12 @@ public class GamePanel extends JPanel implements Runnable {
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
         Graphics2D g2 = (Graphics2D) g;
-        // Renders the player
-        gameData.player.render(g2, gameData.camera);
         // Renders all structures
         for (Structure structure : gameData.allStructures) {
             structure.render(g2, gameData.camera);
         }
+        // Renders the player
+        gameData.player.render(g2, gameData.camera);
         // Renders all chunks
         for (Chunk chunk : gameData.allChunks) {
             chunk.render(g2, gameData.camera);
