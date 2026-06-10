@@ -11,6 +11,7 @@ public class Entity implements Serializable {
     public int y;
     public int hitboxWidth;
     public int hitboxHeight;
+    public PickedItem holdingItem;
     // Stores image files
     public boolean isFacingLeft;    // Since it's a 2D game and there's only left and right
                                     // This value only affects which image to use, not the actual movement direction
@@ -93,12 +94,38 @@ public class Entity implements Serializable {
         }
     }
 
+    public void renderItem(Graphics2D g2d, Camera referenceCam) {
+        if (holdingItem == null) {
+            return;
+        }
+        String path;
+        int itemX, itemY;
+        if (isFacingLeft) {
+            path = holdingItem.data.itemIconPathL[holdingItem.imgIndex];
+            itemX = x + holdingItem.data.iconXOffsetL;
+            itemY = y + holdingItem.data.iconYOffsetL;
+        } else {
+            path = holdingItem.data.itemIconPathR[holdingItem.imgIndex];
+            itemX = x + holdingItem.data.iconXOffsetR;
+            itemY = y + holdingItem.data.iconYOffsetR;
+        }
+        BufferedImage img = GameData.pathToImage(path);
+        if (img == null) {
+            return;
+        }
+        int screenX = referenceCam.convertX(itemX);
+        int screenY = referenceCam.convertY(itemY);
+        int onScreenWidth = img.getWidth() * gamePanel.SCALE_FACTOR;
+        int onScreenHeight = img.getHeight() * gamePanel.SCALE_FACTOR;
+        g2d.drawImage(img, screenX, screenY, onScreenWidth, onScreenHeight, null);
+    }
+
     /**
      * Renders the entity on the screen using the appropriate image based on its facing direction and scale factor
      *
-     * @param g2 the Graphics2D object used for drawing the entity on the screen
+     * @param g2d the Graphics2D object used for drawing the entity on the screen
      * */
-    public void render(Graphics2D g2, Camera referenceCam) {
+    public void render(Graphics2D g2d, Camera referenceCam) {
         BufferedImage img;
         if (isFacingLeft) {
             img = leftImages[imgIndex];
@@ -109,6 +136,6 @@ public class Entity implements Serializable {
         int screenY = referenceCam.convertY(this.y);
         int onScreenWidth = img.getWidth() * gamePanel.SCALE_FACTOR;
         int onScreenHeight = img.getHeight() * gamePanel.SCALE_FACTOR;
-        g2.drawImage(img, screenX, screenY, onScreenWidth, onScreenHeight, null);
+        g2d.drawImage(img, screenX, screenY, onScreenWidth, onScreenHeight, null);
     }
 }

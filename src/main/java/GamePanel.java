@@ -8,14 +8,14 @@ import java.awt.*;
 
 public class GamePanel extends JPanel implements Runnable {
     // Environment settings
-    public final int PANEL_WIDTH = 1200;
-    public final int PANEL_HEIGHT = 840;
-    public final int HORIZON = PANEL_HEIGHT - 300;
+    public static final int PANEL_WIDTH = 1200;
+    public static final int PANEL_HEIGHT = 840;
+    public static final int HORIZON = PANEL_HEIGHT - 300;
+    public static final int SCALE_FACTOR = 4;
     final int FPS = 60;
     final int NANO_SEC = 1_000_000_000;
     final int MILLI_SEC = 1_000;
     // Scale settings
-    final int SCALE_FACTOR = 4;
     KeyHandler keyboard = new KeyHandler();
     Thread gameThread;
     public GameData gameData;

@@ -3,7 +3,6 @@ import java.awt.*;
 public class Player extends Entity {
     public final MoneyBag moneyBag;
     public Mountable mount;
-    public PickedItem crown;
     KeyHandler keyInput;
 
     /**
@@ -16,11 +15,13 @@ public class Player extends Entity {
         this.keyInput = keyHandler;
         this.gamePanel = gamePanel;
         this.mount = mount;
-        crown = new PickedItem(0, 0, 6, 2, 5, GameData.ID.CROWN_ID,
-                gamePanel);
+        holdingItem = new PickedItem(new ItemData(
+                GameData.ID.CROWN_ID, 3, -2, 8, -2,
+                GameData.crownImgL, GameData.crownImgR)
+        );
         mount.isMounted = true;
         mount.anchorsPassenger(this);  // Anchor the player to the mount's position
-        moneyBag = new MoneyBag(15, x, y);
+        moneyBag = new MoneyBag(15, x, y, gamePanel);
     }
 
     /**
@@ -37,16 +38,6 @@ public class Player extends Entity {
     }
 
     /**
-     * When the player loses the crown, it creates a duplicate of the crown item to drop on the ground, resets the
-     * player's reference to the crown, and returns the dropped crown item for further processing
-     *
-     * @return the Item instance representing the lost crown that can be added to the game world as a dropped item
-     * */
-    public PickedItem loseCrown() {
-
-    }
-
-    /**
      * Update the player's state based on key inputs while mounted, allowing the player to toss coins and move with the
      * mount and anchors the crown to the player's head.
      * */
@@ -57,21 +48,19 @@ public class Player extends Entity {
         }
         // Update player's actions based on key inputs while mounted
         if (keyInput.downPressed) {
-            PickedItem tossedCoin = moneyBag.tossCoin();
-            gamePanel.gameData.allPickedItems.add(tossedCoin);
+            Projectile tossedCoin = moneyBag.tossCoin();
+            gamePanel.gameData.allProjectiles.add(tossedCoin);
         }
         if (keyInput.leftPressed) {
             isFacingLeft = true;
             mount.isFacingLeft = true;
             mount.x -= (int) mount.maxSpeed;
             mount.anchorsPassenger(this);   // Update the player's position to follow the mount
-            anchorsCrown();
         } else if (keyInput.rightPressed) {
             isFacingLeft = false;
             mount.isFacingLeft = false;
             mount.x += (int) mount.maxSpeed;
             mount.anchorsPassenger(this);
-            anchorsCrown();
         }
     }
 
@@ -80,5 +69,6 @@ public class Player extends Entity {
         referenceCam.focusOn(this);
         mount.render(g2, referenceCam);
         super.render(g2, referenceCam);
+        super.renderItem(g2, referenceCam);
     }
 }

@@ -7,29 +7,37 @@ public class GameData implements Serializable {
     // serialVersionUID for Serializable compatibility (no @Serial annotation to keep Java 8 compatibility)
     private static final long serialVersionUID = 1L;
     public static final double GRAVITY = 9.8;
+    public static final double UNIVERSAL_TOP_SPEED = 6.0;
     // Image paths
     public static String[] playerImgL = {
-            "/raw images/king left.png",
+            "/raw images/Player/king left.png",
     };
     public static String[] playerImgR = {
-            "/raw images/king right.png",
+            "/raw images/Player/king right.png",
     };
     public static String[] crownImgL = {
-            "/raw images/crown left.png"
+            "/raw images/Crown/crown left.png"
     };
     public static String[] crownImgR = {
-            "/raw images/crown right.png"
+            "/raw images/Crown/crown right.png"
     };
     public static String[] brownHorseImgL = {
-            "/raw images/brown horse left.png",
+            "/raw images/Mountable/brown horse left.png",
     };
     public static String[] brownHorseImgR = {
-            "/raw images/brown horse right.png",
+            "/raw images/Mountable/brown horse right.png",
     };
     public static String[] chunksImg = {
-            "/raw images/bare dirt.png",
-            "/raw images/bare dirt.png",
-            "/raw images/Plain.png"
+            "/raw images/Chunk/bare dirt.png",
+            "/raw images/Chunk/bare dirt.png",
+            "/raw images/Chunk/Plain.png"
+    };
+    public static String[] coinSlotImg = {
+            "/raw images/Coin/Slot/Empty.png",
+            "/raw images/Coin/Slot/Filled.png"
+    };
+    public static String[] coinImg = {
+            "/raw images/Coin/Thrown/coin1.png"
     };
     // Object IDs
     public enum ID {

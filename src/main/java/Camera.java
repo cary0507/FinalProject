@@ -52,6 +52,8 @@ public class Camera implements Serializable {
      * @param mainFocus the Entity to be focused on
      * */
     public void focusOn(Entity mainFocus) {
+        // Stores calculation in variables
+        // See /rough draft.png
         int right = x + this.width;
         int bottom = y + this.height;
         int freeLeft = x + deadZoneWidth;
@@ -60,16 +62,17 @@ public class Camera implements Serializable {
         int freeBottom = bottom - deadZoneHeight;
         int mainFocusRight = mainFocus.x + mainFocus.hitboxWidth;
         int mainFocusBottom = mainFocus.y + mainFocus.hitboxHeight;
-        if (mainFocus.x < freeLeft) {
+        // Check for each boundary
+        if (mainFocus.x < freeLeft) {       // Out of left bound
             this.x = mainFocus.x - deadZoneWidth;
         }
-        if (mainFocus.y < freeTop) {
+        if (mainFocus.y < freeTop) {        // Out of top bound
             this.y = mainFocus.y - deadZoneHeight;
         }
-        if (mainFocusRight > freeRight) {
+        if (mainFocusRight > freeRight) {   // Out of right bound
             this.x = mainFocusRight + deadZoneWidth - this.width;
         }
-        if (mainFocusBottom > freeBottom) {
+        if (mainFocusBottom > freeBottom) { // Out of bottom bound
             this.y = mainFocusBottom + deadZoneHeight - this.height;
         }
     }

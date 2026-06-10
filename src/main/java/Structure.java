@@ -35,11 +35,13 @@ public class Structure extends Entity {
 
     /**
      * Drops one coin at the center of the structure when it is destroyed
-     * @return an Item object representing the dropped coin, positioned at the center of the structure
+     * @return a Projectile object representing the dropped coin, positioned at the center of the structure
      * */
-    public Item rewardCoin() {
+    public Projectile rewardCoin() {
         int centerX = (int) (x + hitboxWidth / 2);
-        Item coin = new Item(centerX, y, 20, 20, 6, GameData.ID.COIN_ID, gamePanel);
+        Projectile coin = new Projectile(
+                centerX, y, 20, 20, 6, gamePanel
+        );
         return coin;
     }
 }

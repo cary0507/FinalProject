@@ -1,10 +1,12 @@
 public class Projectile extends Entity {
+    ItemData data;
     // Vector components
     public double accX;
     public double accY;
     public double velX;
     public double velY;
     public int damage;
+    public boolean isOutOfBound;
 
     /**
      * Initializes the projectile with its position, hitbox dimensions, movement parameters, and vector components.
@@ -14,20 +16,28 @@ public class Projectile extends Entity {
      * @param hitboxWidth  the width of the projectile's hitbox
      * @param hitboxHeight the height of the projectile's hitbox
      * @param maxSpeed     the maximum speed the projectile can reach
-     * @param accX         the initial horizontal acceleration component of the projectile
-     * @param accY         the initial vertical acceleration component of the projectile
-     * @param velX         the initial horizontal velocity component of the projectile
-     * @param velY         the initial vertical velocity component of the projectile
-     *
      */
-    public Projectile(int x, int y, int hitboxWidth, int hitboxHeight, double maxSpeed, double accX, double accY,
-                      double velX, double velY, GamePanel gamePanel) {
+    public Projectile(int x, int y, int hitboxWidth, int hitboxHeight, double maxSpeed, GamePanel gamePanel) {
         super(x, y, hitboxWidth, hitboxHeight, maxSpeed, gamePanel);
+    }
+
+    /**
+     * Sets the ItemData
+     * */
+    public void setData(ItemData data) {
+        this.data = data;
+    }
+
+    /**
+     * Set the values for the motion of the projectile
+     * */
+    public void setMotionValues(double velX, double velY, double accX, double accY, int damage, boolean isOutOfBound) {
         this.accX = accX;
         this.accY = accY;
         this.velX = velX;
         this.velY = velY;
-        this.damage = 0;
+        this.damage = damage;
+        this.isOutOfBound = isOutOfBound;
     }
 
     /**
@@ -46,7 +56,7 @@ public class Projectile extends Entity {
         double newVelY = this.velY + this.accY;
         double facingDir = Math.atan2(velY, velX);  // Gets facing direction from the current velocity vector
         double velMagnitude = Math.sqrt(newVelX * newVelX + newVelY * newVelY);
-        if (velMagnitude > this.maxSpeed) {
+        if (velMagnitude > this.maxSpeed) {  // Check for speed limit
             double maxVelX = Math.cos(facingDir) * this.maxSpeed;
             double maxVelY = Math.sin(facingDir) * this.maxSpeed;
             this.velX = maxVelX;
@@ -63,5 +73,10 @@ public class Projectile extends Entity {
     public void getDisplacement() {
         this.x += (int) this.velX;
         this.y += (int) this.velY;
+    }
+
+    public PickedItem getPicked(ItemData data) {
+        PickedItem itemForm = new PickedItem(data);
+        return itemForm;
     }
 }
