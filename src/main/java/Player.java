@@ -21,7 +21,7 @@ public class Player extends Entity {
         );
         this.mount.passenger = this;    // Sets the player as the passenger
         this.mount.anchorsPassenger();  // Anchor the player to the mount's position
-        moneyBag = new MoneyBag(15, x, y, gamePanel);
+        moneyBag = new MoneyBag(10, x, y, gamePanel);
     }
 
     /**

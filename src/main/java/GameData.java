@@ -41,6 +41,11 @@ public class GameData implements Serializable {
     public static String[] coinImg = {
             "/raw images/Coin/Thrown/coin1.png"
     };
+    public static String[] moneyBagImg = {
+            "/raw images/Money bag/empty.png",
+            "/raw images/Money bag/1~5.png",
+            "/raw images/Money bag/6~10.png"
+    };
     public static String[] wallImgL = {
             "/raw images/Wall/lvl0/Wall lvl 0 L.png",
             "/raw images/Wall/lvl1/Wall lvl 1 L.png",
@@ -94,20 +99,8 @@ public class GameData implements Serializable {
     public final int NEXT_DAY_FRAME;      // Starts entering next dat after 180 seconds passed
     Color skyColor;
     // Background objects
-    Orbits sun = new Orbits(
-            GamePanel.PANEL_WIDTH + 20 * GamePanel.SCALE_PIXEL,
-            GamePanel.PANEL_HEIGHT + 50 * GamePanel.SCALE_PIXEL,
-            GamePanel.PANEL_WIDTH / 2,
-            GamePanel.HORIZON + 40 * GamePanel.SCALE_PIXEL,  // 50 tiles below horizon
-            60 * GamePanel.FPS  // 60 seconds duration
-    );
-    Orbits moon = new Orbits(
-            GamePanel.PANEL_WIDTH + 20 * GamePanel.SCALE_PIXEL,
-            GamePanel.PANEL_HEIGHT + 50 * GamePanel.SCALE_PIXEL,
-            GamePanel.PANEL_WIDTH / 2,
-            GamePanel.HORIZON + 40 * GamePanel.SCALE_PIXEL,
-            30 * GamePanel.FPS  // 30 seconds duration
-    );
+    Orbits sun;
+    Orbits moon;
     public ArrayList<Chunk> allChunks;
     // Game objects
     public GamePanel gamePanel;
@@ -130,11 +123,29 @@ public class GameData implements Serializable {
     public GameData(KeyHandler keyHandler, GamePanel gamePanel) {
         // Initialize time
         framePassed = 0;
+
         // Converts time in seconds to frames
         SUNRISE_DURATION = 8 * GamePanel.FPS;
         SUNSET_DURATION = 5 * GamePanel.FPS;
         NIGHT_FRANE = 60 * GamePanel.FPS;
         NEXT_DAY_FRAME = 90 * GamePanel.FPS;
+
+        // Initialize sun and moon
+        sun = new Orbits(
+                GamePanel.PANEL_WIDTH + 20 * GamePanel.SCALE_PIXEL,
+                GamePanel.PANEL_HEIGHT + 50 * GamePanel.SCALE_PIXEL,
+                GamePanel.PANEL_WIDTH / 2,
+                GamePanel.HORIZON + 40 * GamePanel.SCALE_PIXEL,  // 50 tiles below horizon
+                60 * GamePanel.FPS  // 60 seconds duration
+        );
+        moon = new Orbits(
+                GamePanel.PANEL_WIDTH + 20 * GamePanel.SCALE_PIXEL,
+                GamePanel.PANEL_HEIGHT + 50 * GamePanel.SCALE_PIXEL,
+                GamePanel.PANEL_WIDTH / 2,
+                GamePanel.HORIZON + 40 * GamePanel.SCALE_PIXEL,
+                30 * GamePanel.FPS  // 30 seconds duration
+        );
+
         // Initialize the object's data
         this.gamePanel = gamePanel;
         this.keyHandler = keyHandler;
@@ -145,6 +156,7 @@ public class GameData implements Serializable {
         allEnemies = new ArrayList<>();
         allProjectiles = new ArrayList<>();
         allMounts = new ArrayList<>();
+
         // Setup camera
         camera = new Camera(gamePanel, 0, 0, 400, 100);
         // Set up the map and player with default mount
@@ -184,6 +196,11 @@ public class GameData implements Serializable {
         wallLeft.setImagesFromPaths(wallImgL, wallImgR);
         wallLeft.y -= wallLeft.hitboxHeight;  // Align bottom
         return wallLeft;  // Add object to game
+    }
+
+    public Projectile getCoinOnGround(int x) {
+        Projectile coin = new Projectile(x, GamePanel.HORIZON, UNIVERSAL_TOP_SPEED, gamePanel);
+        return coin;
     }
 
     /**
@@ -232,9 +249,12 @@ public class GameData implements Serializable {
      * Initialize map based on land code
      * */
     public void initLand(int[] landCode) {
+        Random randGen = new Random();
         int curChunkX = 0;  // Acts like a cursor
+        int midIndex = landCode.length / 2;
 
-        for (int code : landCode) {
+        for (int i = 0; i < landCode.length; i++) {
+            int code = landCode[i];
             // Set up the background chunk
             ChunkID chunkID = ChunkID.values()[code];
             // Creates the chunk
@@ -244,11 +264,19 @@ public class GameData implements Serializable {
             curChunkX += curChunk.hitboxWidth;  // Moves to the next Chunk's start
             allChunks.add(curChunk);  // Adds chunk to the game
             // Parse different codes
-            if (code == 0) {  // Spawn chunk is guaranteed to have specific structures
+            if (i < midIndex) {  // Left of the spawn left
+                int leftX = curChunkX - curChunk.hitboxWidth + (randGen.nextInt(150) + 80) * GamePanel.SCALE_PIXEL;
+                int rightX = curChunkX - (randGen.nextInt(30) + 80) * GamePanel.SCALE_PIXEL;
+                // Randomly add walls at different locations
+                allStructures.add(getLeftWall(leftX));
+                allStructures.add(getLeftWall(rightX));
+            }
+            else if (i == midIndex) {  // Spawn chunk is guaranteed to have specific structures
                 // Gets the spawn location for player's mount
                 int spawnX = (int) (curChunkX - 2 * curChunk.hitboxWidth / 3);
                 Mountable defaultHorse = getHorse(spawnX, UNIVERSAL_TOP_SPEED);
                 allMounts.add(defaultHorse);  // Add to game
+
                 // Setup player
                 player = new Player(keyHandler, gamePanel, defaultHorse);
                 player.setImagesFromPaths(playerImgL, playerImgR);
@@ -272,6 +300,12 @@ public class GameData implements Serializable {
                 townCenter.x -= (int) (townCenter.hitboxWidth / 2);  // Align center
                 townCenter.y -= townCenter.hitboxHeight;             // Align bottom
                 allStructures.add(townCenter);
+            }
+            else {  // Right of the spawn land
+                int leftX = curChunkX - curChunk.hitboxWidth + (randGen.nextInt(150) + 80) * GamePanel.SCALE_PIXEL;
+                int rightX = curChunkX - (randGen.nextInt(30) + 80) * GamePanel.SCALE_PIXEL;
+                allStructures.add(getRightWall(leftX));
+                allStructures.add(getRightWall(rightX));
             }
         }
     }

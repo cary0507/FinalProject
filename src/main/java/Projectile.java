@@ -78,4 +78,14 @@ public class Projectile extends Entity {
         PickedItem itemForm = new PickedItem(data);
         return itemForm;
     }
+
+    @Override
+    public void update() {
+        if (this.y <= GamePanel.HORIZON - this.hitboxHeight) {
+            updateVelVectors();
+            getDisplacement();
+        } else {
+            this.y = GamePanel.HORIZON - this.hitboxHeight;
+        }
+    }
 }

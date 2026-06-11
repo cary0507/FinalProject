@@ -55,7 +55,6 @@ public class GamePanel extends JPanel implements Runnable {
         double deltaTime = 0;
         long lastTime = System.nanoTime();
         long currentTime;
-        int curFrame = 0;
 
         while (gameThread != null) {
             // Calculate the time elapsed since the last frame (Learned from YouTube)
@@ -65,7 +64,7 @@ public class GamePanel extends JPanel implements Runnable {
 
             if (deltaTime >= 1) {
                 // Store the current frame
-                gameData.framePassed+=10;
+                gameData.framePassed++;
                 if (gameData.framePassed >= gameData.NEXT_DAY_FRAME) {
                     gameData.framePassed = 0;
                 }
@@ -138,6 +137,7 @@ public class GamePanel extends JPanel implements Runnable {
 
         // Renders the player
         gameData.player.render(g2d, gameData.camera);
+        gameData.player.moneyBag.render(g2d);
 
         // Renders all chunks
         for (Chunk chunk : gameData.allChunks) {

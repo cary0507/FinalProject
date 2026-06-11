@@ -41,8 +41,6 @@ public class Orbits {
         centerY = (int) Math.floor(  // Windows y-axis is reflected, therefore - amplitude
                 -amplitudeHeight * Math.sin(kVal * passedFrame) + trackCenterY
         );
-        System.out.println(amplitudeWidth + " " + amplitudeHeight + " " + centerX + " " + centerY);
-        System.out.println("track centerX: " + trackCenterX + ", track centerY: " + trackCenterX);
     }
 
     /**

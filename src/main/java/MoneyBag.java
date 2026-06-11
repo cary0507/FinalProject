@@ -1,3 +1,4 @@
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -6,10 +7,11 @@ import java.util.Random;
 public class MoneyBag implements Serializable {
     private final ArrayList<PickedItem> coins;
     public final int capacity;
-    public String imagePath;
+    public String[] imagePaths;
     public int dropX;
     public int dropY;
     public GamePanel gamePanel;
+    public int imageIndex;
 
     /**
      * Initializes the money bag with a specified capacity and an empty list of coins.
@@ -22,6 +24,8 @@ public class MoneyBag implements Serializable {
         this.dropX = dropX;
         this.dropY = dropY;
         this.gamePanel = gamePanel;
+        this.imagePaths = GameData.moneyBagImg;
+        imageIndex = 0;
     }
 
     /**
@@ -64,5 +68,22 @@ public class MoneyBag implements Serializable {
             return tossedCoin;
         }
         return null;  // No coins to toss
+    }
+
+    public void render(Graphics2D g2d) {
+        int screenRight = GamePanel.PANEL_WIDTH - 20 * GamePanel.SCALE_PIXEL;
+        int screenTop = 20 * GamePanel.SCALE_PIXEL;
+        BufferedImage img;
+        if (coins.isEmpty()) {
+            imageIndex = 0;
+        } else if (coins.size() <= 5) {
+            imageIndex = 1;
+        } else {
+            imageIndex = 2;
+        }
+        img = GameData.pathToImage(imagePaths[imageIndex]);
+        int scaledWidth = img.getWidth() * GamePanel.SCALE_PIXEL * 2;
+        int scaledHeight = img.getHeight() * GamePanel.SCALE_PIXEL * 2;
+        g2d.drawImage(img, screenRight, screenTop, scaledWidth, scaledHeight, null);
     }
 }
