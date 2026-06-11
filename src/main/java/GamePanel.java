@@ -12,9 +12,14 @@ public class GamePanel extends JPanel implements Runnable {
     public static final int PANEL_HEIGHT = 840;
     public static final int HORIZON = PANEL_HEIGHT - 300;
     public static final int SCALE_PIXEL = 4;  // Pixel sizes of a square tile (Learned from YouTube)
+    // Time
+    final int SEC_IN_NANO = 1_000_000_000;  // 1_000_000_000 nanosecond = 1 second
     public static final int FPS = 60;
-    final int NANO_SEC = 1_000_000_000;  // 1_000_000_000 nanosecond = 1 second
-    final int MILLI_SEC = 1_000;
+    // Sky colors
+    public final int MAX_BLUE = 255;
+    public final int MIN_BLUE = 52;
+    public final int RED_DIFF = 52;
+    public final int GREEN_DIFF = 22;
     // Scale settings
     KeyHandler keyboard = new KeyHandler();
     Thread gameThread;
@@ -46,17 +51,25 @@ public class GamePanel extends JPanel implements Runnable {
      * */
     @Override
     public void run() {
-        double drawInterval = (double) NANO_SEC / FPS;  // Time per frame in nanoseconds
+        double drawInterval = (double) SEC_IN_NANO / FPS;  // Time per frame in nanoseconds
         double deltaTime = 0;
         long lastTime = System.nanoTime();
         long currentTime;
+        int curFrame = 0;
 
         while (gameThread != null) {
-            // Calculate the time elapsed since the last frame
+            // Calculate the time elapsed since the last frame (Learned from YouTube)
             currentTime = System.nanoTime();
             deltaTime += (currentTime - lastTime) / drawInterval;  // Accumulate the time in terms of frames
             lastTime = currentTime;
+
             if (deltaTime >= 1) {
+                // Store the current frame
+                gameData.framePassed++;
+                if (gameData.framePassed >= gameData.NEXT_DAY_FRAME) {
+                    gameData.framePassed = 0;
+                }
+
                 // Update game properties
                 update();
                 // Draws the updated game (Learned from YouTube video)
@@ -72,11 +85,6 @@ public class GamePanel extends JPanel implements Runnable {
     public void update() {
         // Update player data
         gameData.player.update();
-        // Update game time
-        gameData.dayPassed++;
-        if (gameData.dayPassed >= gameData.SUNRISE) {
-            gameData.dayPassed = 0;
-        }
         // Update all mounts
         for (Mountable mount : gameData.allMounts) {
             mount.update();
@@ -100,6 +108,9 @@ public class GamePanel extends JPanel implements Runnable {
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
         Graphics2D g2 = (Graphics2D) g;
+        // Renders background
+        gameData.changeSkyColor(MAX_BLUE, MIN_BLUE, RED_DIFF, GREEN_DIFF);
+        this.setBackground(gameData.skyColor);
         // Renders all structures
         for (Structure structure : gameData.allStructures) {
             structure.render(g2, gameData.camera);

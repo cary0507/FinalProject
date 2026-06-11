@@ -1,6 +1,5 @@
-import com.sun.xml.internal.bind.v2.model.core.ID;
-
 import javax.imageio.ImageIO;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.ArrayList;
@@ -88,9 +87,12 @@ public class GameData implements Serializable {
         HAMMER_SHELF
     }
     // Real time in seconds
-    public int dayPassed;
-    public final int NIGHT_SEC = 120;  // Enters night at 2 minutes after current day
-    public final int SUNRISE = 180;    // Time until sunrise and next dat
+    public int framePassed;             // Frames passed in real life
+    public final int SUNRISE_DURATION;  // Frames it takes for the sky to turn from dark to bright
+    public final int SUNSET_DURATION;   // Frames it takes for the sky to turn from bright to dark in seconds
+    public final int NIGHT_FRANE;         // Starts enter night after 120 seconds passed
+    public final int NEXT_DAY_FRAME;      // Starts entering next dat after 180 seconds passed
+    Color skyColor;
     // Game objects
     public GamePanel gamePanel;
     public KeyHandler keyHandler;
@@ -112,7 +114,12 @@ public class GameData implements Serializable {
      * */
     public GameData(KeyHandler keyHandler, GamePanel gamePanel) {
         // Initialize time
-        dayPassed = 0;
+        framePassed = 0;
+        // Converts time in seconds to frames
+        SUNRISE_DURATION = 15 * GamePanel.FPS;
+        SUNSET_DURATION = 15 * GamePanel.FPS;
+        NIGHT_FRANE = 120 * GamePanel.FPS;
+        NEXT_DAY_FRAME = 180 * GamePanel.FPS;
         // Initialize the object's data
         this.gamePanel = gamePanel;
         this.keyHandler = keyHandler;
@@ -371,5 +378,37 @@ public class GameData implements Serializable {
             }
         }
         return images;
+    }
+
+    /**
+     * Returns the color of the sky with the current time in second stored
+     * Precondition: brightestBlue is larger than darkestBlue, they should range between 0 and 255 inclusive
+     *               redDiff is smaller than darkestBlue, greenDiff is smaller than darkestBlue
+     * Postcondition: changes the rgb color of the current secPassed stored in this class
+     * */
+    public void changeSkyColor(int brightestBlue, int darkestBlue, int redDiff, int greenDiff) {
+        int deltaY = brightestBlue - darkestBlue;  // y2 - y1
+        double slope;
+        int durationPassed;  // Seconds since the color starts changing
+        int blueValue;  // The sky is blue
+
+        // Determine which stage of day it is in
+        if (this.framePassed <= SUNRISE_DURATION) {                       // Morning (Dark to bright)
+            slope = (double) deltaY / SUNRISE_DURATION;  // Slope is positive
+            durationPassed = this.framePassed;
+            blueValue = (int) (slope * durationPassed + darkestBlue);  // bracket to avoid truncate too early
+        } else if (this.framePassed <= NIGHT_FRANE) {                       // Noon (Brightest unchanged)
+            blueValue = brightestBlue;  // Blue value in its brightest stage
+        } else if (this.framePassed <= (NIGHT_FRANE + SUNSET_DURATION)) {   // Night (Bright to dark)
+            slope = - (double) deltaY / SUNSET_DURATION;  // Slope is negative
+            durationPassed = this.framePassed - NIGHT_FRANE;
+            blueValue = (int) (slope * durationPassed + darkestBlue);
+        } else {                                                        // Midnight (Darkest unchanged)
+            blueValue = darkestBlue;  // Blue value in its darkest stage
+        }
+        // Gets red and green values
+        int redValue = blueValue - redDiff;
+        int greenValue = blueValue - greenDiff;
+        this.skyColor = new Color(redValue, greenValue, blueValue);
     }
 }
