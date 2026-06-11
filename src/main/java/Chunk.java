@@ -17,6 +17,10 @@ public class Chunk implements Serializable {
         hitboxHeight = img.getHeight() * GamePanel.SCALE_PIXEL;
     }
 
+    public void update(Player player) {
+
+    }
+
     public void render(Graphics2D g2d,Camera referenceCam) {
         int screenX = referenceCam.convertX(this.x);
         int screenY = referenceCam.convertY(this.y);

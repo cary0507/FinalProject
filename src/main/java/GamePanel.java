@@ -13,11 +13,12 @@ public class GamePanel extends JPanel implements Runnable {
     public static final int HORIZON = PANEL_HEIGHT - 300;
     public static final int SCALE_PIXEL = 4;  // Pixel sizes of a square tile (Learned from YouTube)
     public static final int FPS = 60;
-    final int NANO_SEC = 1_000_000_000;
+    final int NANO_SEC = 1_000_000_000;  // 1_000_000_000 nanosecond = 1 second
     final int MILLI_SEC = 1_000;
     // Scale settings
     KeyHandler keyboard = new KeyHandler();
     Thread gameThread;
+    // Game data setting
     public GameData gameData;
 
     /**
@@ -71,9 +72,20 @@ public class GamePanel extends JPanel implements Runnable {
     public void update() {
         // Update player data
         gameData.player.update();
+        // Update game time
+        gameData.dayPassed++;
+        if (gameData.dayPassed >= gameData.SUNRISE) {
+            gameData.dayPassed = 0;
+        }
         // Update all mounts
         for (Mountable mount : gameData.allMounts) {
             mount.update();
+        }
+        for (Structure structure : gameData.allStructures) {
+            structure.update();
+        }
+        for (Chunk chunk : gameData.allChunks) {
+            chunk.update(gameData.player);
         }
         // The order of the update matters because if camera is updated first, it will take some delay for the camera
         // to focus on the main objects again

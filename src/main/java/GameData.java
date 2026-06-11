@@ -87,6 +87,10 @@ public class GameData implements Serializable {
         BOW_SHELF,
         HAMMER_SHELF
     }
+    // Real time in seconds
+    public int dayPassed;
+    public final int NIGHT_SEC = 120;  // Enters night at 2 minutes after current day
+    public final int SUNRISE = 180;    // Time until sunrise and next dat
     // Game objects
     public GamePanel gamePanel;
     public KeyHandler keyHandler;
@@ -107,6 +111,8 @@ public class GameData implements Serializable {
      * @param gamePanel the GamePanel object of main screen
      * */
     public GameData(KeyHandler keyHandler, GamePanel gamePanel) {
+        // Initialize time
+        dayPassed = 0;
         // Initialize the object's data
         this.gamePanel = gamePanel;
         this.keyHandler = keyHandler;
