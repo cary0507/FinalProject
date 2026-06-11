@@ -65,7 +65,7 @@ public class GamePanel extends JPanel implements Runnable {
 
             if (deltaTime >= 1) {
                 // Store the current frame
-                gameData.framePassed++;
+                gameData.framePassed+=10;
                 if (gameData.framePassed >= gameData.NEXT_DAY_FRAME) {
                     gameData.framePassed = 0;
                 }
@@ -83,6 +83,14 @@ public class GamePanel extends JPanel implements Runnable {
      * Updates the game state, including player movement, enemy behavior, and other game logic.
      * */
     public void update() {
+        // Updates background
+        gameData.changeSkyColor(MAX_BLUE, MIN_BLUE, RED_DIFF, GREEN_DIFF);  // Sky
+        if (gameData.framePassed <= gameData.NIGHT_FRANE) {  // Noon
+            gameData.sun.update(gameData.framePassed);
+        } else {  // Night
+            int sinceNight = gameData.framePassed - gameData.NIGHT_FRANE;
+            gameData.moon.update(sinceNight);
+        }
         // Update player data
         gameData.player.update();
         // Update all mounts
@@ -107,25 +115,35 @@ public class GamePanel extends JPanel implements Runnable {
     @Override  // Learned from YouTube video
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
-        Graphics2D g2 = (Graphics2D) g;
+        Graphics2D g2d = (Graphics2D) g;
+
         // Renders background
-        gameData.changeSkyColor(MAX_BLUE, MIN_BLUE, RED_DIFF, GREEN_DIFF);
         this.setBackground(gameData.skyColor);
+        if (gameData.framePassed <= gameData.NIGHT_FRANE) {
+            gameData.sun.render(g2d, 40 * SCALE_PIXEL, 40 * SCALE_PIXEL, Color.WHITE);
+        } else {
+            Color moonColor = new Color(133, 147, 154);
+            gameData.moon.render(g2d, 40 * SCALE_PIXEL, 40 * SCALE_PIXEL, moonColor);
+        }
+
         // Renders all structures
         for (Structure structure : gameData.allStructures) {
-            structure.render(g2, gameData.camera);
+            structure.render(g2d, gameData.camera);
         }
+
         // Renders all mounts
         for (Mountable mount : gameData.allMounts) {
-            mount.render(g2, gameData.camera);
+            mount.render(g2d, gameData.camera);
         }
+
         // Renders the player
-        gameData.player.render(g2, gameData.camera);
+        gameData.player.render(g2d, gameData.camera);
+
         // Renders all chunks
         for (Chunk chunk : gameData.allChunks) {
-            chunk.render(g2, gameData.camera);
+            chunk.render(g2d, gameData.camera);
         }
         // Dispose of the graphics context to free up resources
-        g2.dispose();
+        g2d.dispose();
     }
 }

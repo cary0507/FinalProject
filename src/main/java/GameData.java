@@ -93,6 +93,22 @@ public class GameData implements Serializable {
     public final int NIGHT_FRANE;         // Starts enter night after 120 seconds passed
     public final int NEXT_DAY_FRAME;      // Starts entering next dat after 180 seconds passed
     Color skyColor;
+    // Background objects
+    Orbits sun = new Orbits(
+            GamePanel.PANEL_WIDTH + 20 * GamePanel.SCALE_PIXEL,
+            GamePanel.PANEL_HEIGHT + 50 * GamePanel.SCALE_PIXEL,
+            GamePanel.PANEL_WIDTH / 2,
+            GamePanel.HORIZON + 40 * GamePanel.SCALE_PIXEL,  // 50 tiles below horizon
+            60 * GamePanel.FPS  // 60 seconds duration
+    );
+    Orbits moon = new Orbits(
+            GamePanel.PANEL_WIDTH + 20 * GamePanel.SCALE_PIXEL,
+            GamePanel.PANEL_HEIGHT + 50 * GamePanel.SCALE_PIXEL,
+            GamePanel.PANEL_WIDTH / 2,
+            GamePanel.HORIZON + 40 * GamePanel.SCALE_PIXEL,
+            30 * GamePanel.FPS  // 30 seconds duration
+    );
+    public ArrayList<Chunk> allChunks;
     // Game objects
     public GamePanel gamePanel;
     public KeyHandler keyHandler;
@@ -100,7 +116,6 @@ public class GameData implements Serializable {
     public Player player;
     public ArrayList<PickedItem> allPickedItems;
     public ArrayList<Human> allHumans;
-    public ArrayList<Chunk> allChunks;
     public ArrayList<Structure> allStructures;
     public ArrayList<Enemy> allEnemies;
     public ArrayList<Projectile> allProjectiles;
@@ -116,10 +131,10 @@ public class GameData implements Serializable {
         // Initialize time
         framePassed = 0;
         // Converts time in seconds to frames
-        SUNRISE_DURATION = 15 * GamePanel.FPS;
-        SUNSET_DURATION = 15 * GamePanel.FPS;
-        NIGHT_FRANE = 120 * GamePanel.FPS;
-        NEXT_DAY_FRAME = 180 * GamePanel.FPS;
+        SUNRISE_DURATION = 8 * GamePanel.FPS;
+        SUNSET_DURATION = 5 * GamePanel.FPS;
+        NIGHT_FRANE = 60 * GamePanel.FPS;
+        NEXT_DAY_FRAME = 90 * GamePanel.FPS;
         // Initialize the object's data
         this.gamePanel = gamePanel;
         this.keyHandler = keyHandler;
@@ -385,6 +400,7 @@ public class GameData implements Serializable {
      * Precondition: brightestBlue is larger than darkestBlue, they should range between 0 and 255 inclusive
      *               redDiff is smaller than darkestBlue, greenDiff is smaller than darkestBlue
      * Postcondition: changes the rgb color of the current secPassed stored in this class
+     * <a href="https://www.desmos.com/calculator/b8fehioczd">Experiment by myself</a>
      * */
     public void changeSkyColor(int brightestBlue, int darkestBlue, int redDiff, int greenDiff) {
         int deltaY = brightestBlue - darkestBlue;  // y2 - y1
@@ -402,7 +418,7 @@ public class GameData implements Serializable {
         } else if (this.framePassed <= (NIGHT_FRANE + SUNSET_DURATION)) {   // Night (Bright to dark)
             slope = - (double) deltaY / SUNSET_DURATION;  // Slope is negative
             durationPassed = this.framePassed - NIGHT_FRANE;
-            blueValue = (int) (slope * durationPassed + darkestBlue);
+            blueValue = (int) (slope * durationPassed + brightestBlue);
         } else {                                                        // Midnight (Darkest unchanged)
             blueValue = darkestBlue;  // Blue value in its darkest stage
         }
