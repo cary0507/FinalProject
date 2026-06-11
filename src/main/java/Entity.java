@@ -107,7 +107,6 @@ public class Entity implements Serializable {
     public void update() {
         passedFrame++;
         int maxIndex;
-        System.out.println(passedFrame + " " + animeDuration);
         if (isFacingLeft) {
             animeDuration = (int) (leftImages.length / GamePanel.FPS);
             maxIndex = leftImages.length - 1;

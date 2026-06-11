@@ -1,7 +1,10 @@
+import com.sun.xml.internal.bind.v2.model.core.ID;
+
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Random;
 
 public class GameData implements Serializable {
     // serialVersionUID for Serializable compatibility (no @Serial annotation to keep Java 8 compatibility)
@@ -49,6 +52,11 @@ public class GameData implements Serializable {
             "/raw images/Wall/lvl1/Wall lvl 1 R.png",
             "/raw images/Wall/lvl2/Wall lvl 2 R.png"
     };
+    public static String[] townCenterImg = {
+            "/raw images/Town center/lvl0/Town center lvl0.png",
+            "/raw images/Town center/lvl1/Town center lvl1 anim1.png",
+            "/raw images/Town center/lvl2/Town center lvl 2 1.png"
+    };
     // Object IDs
     public enum ItemID {
         CROWN,
@@ -69,10 +77,8 @@ public class GameData implements Serializable {
         PLAIN
     }
     public enum StructureID {
-        HEADQUARTER,
-        TREE,
+        TOWN_CENTER,
         GRASS,
-        TEMPLE,
         WALL,
         ARCHERY_TOWER,
         PORTAL,
@@ -101,7 +107,9 @@ public class GameData implements Serializable {
      * @param gamePanel the GamePanel object of main screen
      * */
     public GameData(KeyHandler keyHandler, GamePanel gamePanel) {
+        // Initialize the object's data
         this.gamePanel = gamePanel;
+        this.keyHandler = keyHandler;
         allPickedItems = new ArrayList<>();
         allHumans = new ArrayList<>();
         allChunks = new ArrayList<>();
@@ -138,25 +146,32 @@ public class GameData implements Serializable {
     /**
      * Create a wall to the left of the spawn chunk
      * */
-    public void setLeftWall(int alignLeftX) {
-        Structure wallLeft = new Structure(
-                alignLeftX, GamePanel.HORIZON, 10, GameData.StructureID.WALL, gamePanel
+    public UpgradableStruct getLeftWall(int alignLeftX) {
+        UpgradableStruct wallLeft = new UpgradableStruct(
+                alignLeftX, GamePanel.HORIZON,
+                GameData.StructureID.WALL, null,  // No one sit on the wall
+                gamePanel
         );
         wallLeft.isFacingLeft = true;  // Facing left
         wallLeft.setImagesFromPaths(wallImgL, wallImgR);
         wallLeft.y -= wallLeft.hitboxHeight;  // Align bottom
-        allStructures.add(wallLeft);  // Add object to game
+        return wallLeft;  // Add object to game
     }
 
-    public void setRightWall(int alignRightX) {
-        Structure wallRight = new Structure(
-                alignRightX, GamePanel.HORIZON, 10, GameData.StructureID.WALL, gamePanel
+    /**
+     * Create a wall to the right of the spawn chunk
+     * */
+    public UpgradableStruct getRightWall(int alignRightX) {
+        UpgradableStruct wallRight = new UpgradableStruct(
+                alignRightX, GamePanel.HORIZON,
+                GameData.StructureID.WALL, null,
+                gamePanel
         );
         wallRight.isFacingLeft = false;  // Facing right
         wallRight.setImagesFromPaths(wallImgL, wallImgR);
         wallRight.x -= wallRight.hitboxWidth;   // Align right
         wallRight.y -= wallRight.hitboxHeight;  // Align bottom
-        allStructures.add(wallRight);  // Add object to game
+        return wallRight;
     }
 
     /**
@@ -168,13 +183,16 @@ public class GameData implements Serializable {
      * @return the codes stored in an int array
      * */
     public int[] getLandCode(int landRadius, int numChunkOptions) {
+        Random randGen = new Random();
+
         int totalChunks = landRadius * 2 + 1;
         int[] landCode = new int[totalChunks];
         int mid = (int) ((totalChunks - 1) / 2);  // Explicit is better than implicit
+        // Loop through the array and add random numbers
         for (int i = 0; i < landCode.length; i++) {
             if (i != mid) {
-                int rand = (int) (Math.random() * (numChunkOptions) + 1);  // Randomize the land code
-                landCode[i] = rand;
+                int randNum = randGen.nextInt(numChunkOptions - 1 + 1) + 1;  // nextInt(hi - lo + 1) + lo
+                landCode[i] = randNum;
             } else {
                 landCode[i] = 0;
             }
@@ -209,13 +227,23 @@ public class GameData implements Serializable {
 
                 // Create a default wall structure to the left of spawn
                 int leftX = curChunkX - curChunk.hitboxWidth + 10 * GamePanel.SCALE_PIXEL;
-                setLeftWall(leftX);
-
-
+                UpgradableStruct defaultWallL = getLeftWall(leftX);
+                allStructures.add(defaultWallL);  // Don't forget to add to game
 
                 // Create the default wall to the right of the spawn
                 int rightX = curChunkX - 10 * GamePanel.SCALE_PIXEL;
-                setRightWall(rightX);
+                UpgradableStruct defaultWallR = getRightWall(rightX);
+                allStructures.add(defaultWallR);
+
+                // Create the town center
+                int chunkMid = curChunkX - (int) (curChunk.hitboxWidth / 2);
+                UpgradableStruct townCenter = new UpgradableStruct(
+                        chunkMid, GamePanel.HORIZON, StructureID.TOWN_CENTER, null, gamePanel
+                );
+                townCenter.setImagesFromPaths(townCenterImg, townCenterImg);  // Never turns and always at middle
+                townCenter.x -= (int) (townCenter.hitboxWidth / 2);  // Align center
+                townCenter.y -= townCenter.hitboxHeight;             // Align bottom
+                allStructures.add(townCenter);
             }
         }
     }
@@ -294,6 +322,7 @@ public class GameData implements Serializable {
      * @return the BufferedImage, if exists
      * */
     public static BufferedImage pathToImage(String path) {
+        // Learned from YouTube
         BufferedImage img;
         try {
             img = ImageIO.read(GameData.class.getResourceAsStream(path));

@@ -1,6 +1,7 @@
 import java.awt.image.BufferedImage;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Random;
 
 public class MoneyBag implements Serializable {
     private final ArrayList<PickedItem> coins;
@@ -29,12 +30,15 @@ public class MoneyBag implements Serializable {
      * @param coin the coin to be added
      * */
     public void addCoin(Projectile coin) {
+        Random randGen = new Random();
         final int DROP_CHANCE = 2;  // 1/2 = 50% chance
+
         if (coin.data.getId() == GameData.ItemID.COIN) {
             coins.add(coin.getPicked(coin.data));
+            // Check when hits max capacity
             if (coins.size() > capacity) {
-                int rand = (int) (Math.random() * (DROP_CHANCE) + 1);
-                if (rand == 1) {
+                int chance = randGen.nextInt(DROP_CHANCE - 1 + 1) + 1;  // nextInt(high - low + 1) + low
+                if (chance == 1) {
                     Projectile droppedCoin = tossCoin();
                     droppedCoin.isOutOfBound = true;
                 }

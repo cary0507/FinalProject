@@ -6,7 +6,7 @@ public class Projectile extends Entity {
     public double velX;
     public double velY;
     public int damage;
-    public boolean isOutOfBound;
+    public boolean isOutOfBound;  // When set to true, the projectile will fall through the water and disappear
 
     /**
      * Initializes the projectile with its position, hitbox dimensions, movement parameters, and vector components.
