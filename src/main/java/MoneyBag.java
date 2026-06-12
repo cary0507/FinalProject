@@ -13,6 +13,7 @@ public class MoneyBag implements Serializable {
     public int dropY;
     public GamePanel gamePanel;
     public int imageIndex;
+    public int numCoins;
 
     /**
      * Initializes the money bag with a specified capacity and an empty list of coins.
@@ -49,6 +50,7 @@ public class MoneyBag implements Serializable {
                 }
             }
         }
+        numCoins = coins.size();
     }
 
     /**
@@ -67,6 +69,7 @@ public class MoneyBag implements Serializable {
                     0, GameData.GRAVITY,
                     0, false
             );
+            numCoins = coins.size();
             return tossedCoin;
         }
         return null;  // No coins to toss

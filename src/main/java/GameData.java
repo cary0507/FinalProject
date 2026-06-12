@@ -37,9 +37,8 @@ public class GameData implements Serializable {
             "/raw images/Chunk/bare dirt.png",
             "/raw images/Chunk/Plain.png"
     };
-    public static String[] coinSlotImg = {
-            "/raw images/Coin/Slot/Empty.png",
-            "/raw images/Coin/Slot/Filled.png"
+    public static String[] payHint = {
+            "/raw images/Coin/Trade/Pay.png"
     };
     public static String[] coinImg;
     public static String[] moneyBagImg = {
@@ -61,6 +60,12 @@ public class GameData implements Serializable {
             "/raw images/Town center/lvl0/Town center lvl0.png",
             "/raw images/Town center/lvl1/Town center lvl1 anim1.png",
             "/raw images/Town center/lvl2/Town center lvl 2 1.png"
+    };
+    public static String[] bowShop = {
+            "/raw images/vendor/bow shop.png"
+    };
+    public static String[] sickleShop = {
+            "/raw images/vendor/sickle shop.png"
     };
     public static String[] humanImgL = {
             "/raw images/NPC/vagrant L.png",
@@ -136,7 +141,7 @@ public class GameData implements Serializable {
     public UpgradableStruct townCenter;
     public ArrayList<PickedItem> allPickedItems;
     public ArrayList<Human> allHumans;
-    public ArrayList<Structure> allStructures;
+    public ArrayList<UpgradableStruct> allUpgradable;
     public ArrayList<Portal> allPortals;
     public ArrayList<Enemy> allEnemies;
     public ArrayList<Projectile> allProjectiles;
@@ -180,7 +185,7 @@ public class GameData implements Serializable {
         allPickedItems = new ArrayList<>();
         allHumans = new ArrayList<>();
         allChunks = new ArrayList<>();
-        allStructures = new ArrayList<>();
+        allUpgradable = new ArrayList<>();
         allPortals = new ArrayList<>();
         allEnemies = new ArrayList<>();
         allProjectiles = new ArrayList<>();
@@ -325,8 +330,8 @@ public class GameData implements Serializable {
                 int leftX = curChunkX - curChunk.hitboxWidth + (randGen.nextInt(150) + 80) * GamePanel.SCALE_PIXEL;
                 int rightX = curChunkX - (randGen.nextInt(30) + 100) * GamePanel.SCALE_PIXEL;
                 // Randomly add walls at different locations
-                allStructures.add(getLeftWall(leftX));
-                allStructures.add(getLeftWall(rightX));
+                allUpgradable.add(getLeftWall(leftX));
+                allUpgradable.add(getLeftWall(rightX));
             }
             else if (i == midIndex) {  // Spawn chunk is guaranteed to have specific structures
                 // Gets the spawn location for player's mount
@@ -348,12 +353,12 @@ public class GameData implements Serializable {
                 // Create a default wall structure to the left of spawn
                 int leftX = curChunkX - curChunk.hitboxWidth + 10 * GamePanel.SCALE_PIXEL;
                 UpgradableStruct defaultWallL = getLeftWall(leftX);
-                allStructures.add(defaultWallL);  // Don't forget to add to game
+                allUpgradable.add(defaultWallL);  // Don't forget to add to game
 
                 // Create the default wall to the right of the spawn
                 int rightX = curChunkX - 10 * GamePanel.SCALE_PIXEL;
                 UpgradableStruct defaultWallR = getRightWall(rightX);
-                allStructures.add(defaultWallR);
+                allUpgradable.add(defaultWallR);
 
                 // Add 2 vagrants
                 allHumans.add(spawnNPC(leftX + 70 * GamePanel.SCALE_PIXEL));
@@ -367,13 +372,13 @@ public class GameData implements Serializable {
                 this.townCenter.setImagesFromPaths(townCenterImg, townCenterImg);  // Never turns and always at middle
                 this.townCenter.x -= (int) (this.townCenter.hitboxWidth / 2);  // Align center
                 this.townCenter.y -= this.townCenter.hitboxHeight;             // Align bottom
-                allStructures.add(this.townCenter);
+                allUpgradable.add(this.townCenter);
             }
             else {  // Right of the spawn land
                 int leftX = curChunkX - curChunk.hitboxWidth + (randGen.nextInt(150) + 80) * GamePanel.SCALE_PIXEL;
                 int rightX = curChunkX - (randGen.nextInt(30) + 100) * GamePanel.SCALE_PIXEL;
-                allStructures.add(getRightWall(leftX));
-                allStructures.add(getRightWall(rightX));
+                allUpgradable.add(getRightWall(leftX));
+                allUpgradable.add(getRightWall(rightX));
             }
         }
 

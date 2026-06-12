@@ -1,6 +1,5 @@
 public class UpgradableStruct extends ContainerStruct {
     public int level;
-    public int priceLvlUp;
 
     /**
      * Creates a new UpgradableStruct.
@@ -14,7 +13,6 @@ public class UpgradableStruct extends ContainerStruct {
     public UpgradableStruct(int x, int y, GameData.StructureID id, int[][] relativePos, GamePanel gamePanel) {
         super(x, y, 0, id, relativePos, gamePanel);
         level = 0;
-        priceLvlUp = 1;
     }
 
     /**
@@ -29,7 +27,6 @@ public class UpgradableStruct extends ContainerStruct {
             return;
         }
         level++;
-        priceLvlUp *= 3;
         maxHP = 5 + 5 * (this.level - 1);
         curHP = this.maxHP;
         hitboxWidth = newWidth;

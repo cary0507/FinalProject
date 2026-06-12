@@ -5,7 +5,9 @@ public class Human extends Entity {
     public Structure habitat;
     public MoneyBag moneyBag;
     public PickedItem equipping;
-    public int wonderFrame;
+    public int maxWanderFrame = 2 * GamePanel.FPS;  // 2 seconds max
+    public int wanderFrame;
+    public int wanderChance = 500;  // Higher = less likely
 
     /**
      * Initializes the entity with its position, hitbox dimensions, and movement parameters.
@@ -16,13 +18,13 @@ public class Human extends Entity {
         super(x, y, maxSpeed, gamePanel);
         this.id = GameData.JobID.FUGITIVE;
         this.habitat = habitat;
-        wonderFrame = 0;
+        wanderFrame = 0;
         moneyBag = new MoneyBag(1, x, y, gamePanel);
         setImagesFromPaths(GameData.humanImgL,  GameData.humanImgR);
     }
 
     public void wander() {
-        if (wonderFrame <= 0) return;
+        if (wanderFrame <= 0) return;
         if (isFacingLeft) {
             x -= 1;
         } else {
@@ -44,14 +46,19 @@ public class Human extends Entity {
 
     @Override
     public void update() {
+        Random rand = new Random();
         imgIndex = id.ordinal();
         // Different job behaves differently
         switch(id) {
             case FUGITIVE:
                 moneyBag.capacity = 1;
+                if (moneyBag.numCoins >= moneyBag.capacity) {
+                    this.id = GameData.JobID.VILLAGER;
+                }
                 break;
             case VILLAGER:
                 moneyBag.capacity = 2;
+                wanderChance = 1000;
                 break;
             case FARMER:
                 moneyBag.capacity = 9;
@@ -60,5 +67,19 @@ public class Human extends Entity {
                 moneyBag.capacity = 11;
                 break;
         }
+        int rollWander = rand.nextInt(wanderChance);
+        if (rollWander == 67) {
+            int randDir = rand.nextInt(2);
+            if (randDir == 0) {
+                isFacingLeft = true;
+            } else {
+                isFacingLeft = false;
+            }
+            wanderFrame = rand.nextInt(maxWanderFrame);
+        }
+        if (wanderFrame > 0) {
+            wanderFrame--;
+        }
+        wander();
     }
 }

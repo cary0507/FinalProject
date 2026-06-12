@@ -1,6 +1,10 @@
+import java.awt.*;
+import java.awt.image.BufferedImage;
+
 public class ContainerStruct extends Structure {
     public Entity[] containing;
     public int[][] relativePos;  // Stored x and y positions to anchor entities to the structure
+    BufferedImage payImg;
 
     /**
      * Initializes the structure with its position, hitbox dimensions, health points, and the entities it contains.
@@ -13,6 +17,7 @@ public class ContainerStruct extends Structure {
         } else {
             this.containing = null;
         }
+        payImg = GameData.pathToImage(GameData.payHint[0]);
     }
 
     /**
@@ -62,5 +67,19 @@ public class ContainerStruct extends Structure {
     public void update() {
         super.update();
         anchorEntities();
+    }
+
+    /**
+     * Renders tip to hint player to pay a coin
+     * */
+    public void renderHint(Graphics2D g2d, Camera cam) {
+        int hintWidth = payImg.getWidth() * GamePanel.SCALE_PIXEL;
+        int hintHeight = payImg.getHeight() * GamePanel.SCALE_PIXEL;
+        int imgX = x + hitboxWidth / 2 - hintWidth / 2;
+        int imgY = y - hintHeight;
+        int xOnScreen = cam.convertX(imgX);
+        int yOnScreen = cam.convertY(imgY);
+        g2d.drawImage(
+                payImg, xOnScreen, yOnScreen, hintWidth, hintHeight, null);
     }
 }

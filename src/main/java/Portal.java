@@ -24,6 +24,7 @@ public class Portal extends Structure {
             enemy.y -= enemy.hitboxHeight;
             genEnemies.add(enemy);
         }
+        numEnemy += 3;  // Enhance
         return genEnemies;
     }
 

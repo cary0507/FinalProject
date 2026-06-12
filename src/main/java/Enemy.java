@@ -31,4 +31,18 @@ public class Enemy extends Entity {
         this.dmgCooldown = dmgCooldown;
         this.curCooldown = 0;
     }
+
+    /**
+     * Tracks the player
+     * */
+    public void update(Player player) {
+        int playerCenterX = player.mount.x + player.mount.hitboxWidth / 2;
+        if (x <= playerCenterX) {
+            isFacingLeft = false;
+            x += (int) maxSpeed;
+        } else {
+            isFacingLeft = true;
+            x -= (int) maxSpeed;
+        }
+    }
 }

@@ -5,6 +5,8 @@
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.Objects;
+import java.util.Random;
 
 public class GamePanel extends JPanel implements Runnable {
     // Environment settings
@@ -69,7 +71,7 @@ public class GamePanel extends JPanel implements Runnable {
 
             if (deltaTime >= 1) {
                 // Store the current frame
-                gameData.framePassed++;
+                gameData.framePassed+=10;
                 if (gameData.framePassed >= gameData.NEXT_DAY_FRAME) {
                     gameData.framePassed = 0;
                 }
@@ -84,15 +86,47 @@ public class GamePanel extends JPanel implements Runnable {
         }
     }
 
+    public void updateProjectiles () {
+        for (int i = 0; i < gameData.allProjectiles.size(); i++) {
+            Projectile projectile = gameData.allProjectiles.get(i);
+            projectile.update();
+            // Check if this projectile is a coin
+            if (Objects.requireNonNull(projectile.data.getId()) == GameData.ItemID.COIN) {
+                // The player will pick up the coin if they collides
+                if (GameData.isInside(projectile, gameData.player.mount) &&
+                        projectile.data.curPickFrame >= projectile.data.maxPickDelay) {  // Prevents instant pick
+                    gameData.player.moneyBag.addCoin(projectile);
+                    gameData.allProjectiles.remove(projectile);
+                }
+                for (Human human : gameData.allHumans) {
+                    if (GameData.isInside(human, projectile) &&
+                            human.moneyBag.capacity > human.moneyBag.numCoins) {
+                        human.moneyBag.addCoin(projectile);
+                        gameData.allProjectiles.remove(projectile);
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
     /**
      * Updates the game state, including player movement, enemy behavior, and other game logic.
      * */
     public void update() {
+        Random rand = new Random();
         // Updates background
         gameData.changeSkyColor(MAX_BLUE, MIN_BLUE, RED_DIFF, GREEN_DIFF);  // Sky
-        if (gameData.framePassed <= gameData.NIGHT_FRANE) {  // Noon
+        if (gameData.framePassed < gameData.NIGHT_FRANE) {  // Noon
+            // Sun's orbit
             gameData.sun.update(gameData.framePassed);
+        } else if (gameData.framePassed == gameData.NIGHT_FRANE) {  // At Night
+            // Choose a random portal to spawn enemy
+            int bound = gameData.allPortals.size();
+            int choice = rand.nextInt(bound);
+            gameData.allEnemies.addAll(gameData.allPortals.get(choice).generateEnemies());
         } else {  // Night
+            // Moon's orbit
             int sinceNight = gameData.framePassed - gameData.NIGHT_FRANE;
             gameData.moon.update(sinceNight);
         }
@@ -105,27 +139,12 @@ public class GamePanel extends JPanel implements Runnable {
         }
 
         // Update each structure
-        for (int i = 0; i < gameData.allStructures.size(); i++) {
-            Structure structure = gameData.allStructures.get(i);
-            structure.update();
+        for (int i = 0; i < gameData.allUpgradable.size(); i++) {
+            UpgradableStruct upgradeStruct = gameData.allUpgradable.get(i);
+            upgradeStruct.update();
         }
 
-        // Update each projectile
-        for (int i = 0; i < gameData.allProjectiles.size(); i++) {
-            Projectile projectile = gameData.allProjectiles.get(i);
-            projectile.update();
-            // Check if this projectile is a coin
-            switch (projectile.data.getId()) {
-                case COIN:
-                    // The player will pick up the coin if they collides
-                    if (gameData.isInside(projectile, gameData.player.mount) &&
-                            projectile.data.curPickFrame >= projectile.data.maxPickDelay) {  // Prevents instant pick
-                        gameData.player.moneyBag.addCoin(projectile);
-                        gameData.allProjectiles.remove(projectile);
-                    }
-                    break;
-            }
-        }
+        updateProjectiles();
 
         // Update each human
         for (int i = 0; i < gameData.allHumans.size(); i++) {
@@ -143,11 +162,6 @@ public class GamePanel extends JPanel implements Runnable {
         for (int i = 0; i < gameData.allChunks.size(); i++) {
             Chunk chunk = gameData.allChunks.get(i);
             chunk.update(gameData.player);
-        }
-
-        for (int i = 0; i < gameData.allPortals.size(); i++) {
-            Portal portal = gameData.allPortals.get(i);
-            portal.update();
         }
         // The order of the update matters because if camera is updated first, it will take some delay for the camera
         // to focus on the main objects again
@@ -171,13 +185,17 @@ public class GamePanel extends JPanel implements Runnable {
             Color moonColor = new Color(133, 147, 154);
             gameData.moon.render(g2d, 40 * SCALE_PIXEL, 40 * SCALE_PIXEL, moonColor);
         }
-        // Draw river frotn
+        // Draw river front
         Color riverColor = new Color(64, 112, 129);
         g2d.setColor(riverColor);
         g2d.fillRect(0, HORIZON + 120, GamePanel.PANEL_WIDTH, 50);
         // Renders all structures
-        for (Structure structure : gameData.allStructures) {
-            structure.render(g2d, gameData.camera);
+        for (UpgradableStruct upgradeStruct : gameData.allUpgradable) {
+            upgradeStruct.render(g2d, gameData.camera);
+            if (GameData.isInside(upgradeStruct, gameData.player.mount) &&
+                    upgradeStruct.level < upgradeStruct.leftImages.length) {
+                upgradeStruct.renderHint(g2d, gameData.camera);
+            }
         }
         // Renders all NPC
         for (Human human : gameData.allHumans) {
