@@ -8,7 +8,7 @@ import java.util.Random;
 public class GameData implements Serializable {
     // serialVersionUID for Serializable compatibility (no @Serial annotation to keep Java 8 compatibility)
     private static final long serialVersionUID = 1L;
-    public static final double GRAVITY = 9.8;
+    public static final double GRAVITY = 1.5;
     public static final double UNIVERSAL_TOP_SPEED = 6.0;
     // Image paths
     public static String[] playerImgL = {
@@ -209,6 +209,7 @@ public class GameData implements Serializable {
         Projectile coin = new Projectile(x, GamePanel.HORIZON, UNIVERSAL_TOP_SPEED, gamePanel, coinData);
         coin.setMotionValues(0, 0, 0, 0, 0, false);
         coin.setImagesFromPaths(coin.data.thrownImgPath, coin.data.thrownImgPath);
+        coin.data.curPickFrame = coin.data.maxPickDelay;
         coin.y -= coin.hitboxHeight;  // Align to ground
         return coin;
     }

@@ -55,7 +55,6 @@ public class GamePanel extends JPanel implements Runnable {
         double deltaTime = 0;
         long lastTime = System.nanoTime();
         long currentTime;
-
         while (gameThread != null) {
             // Calculate the time elapsed since the last frame (Learned from YouTube)
             currentTime = System.nanoTime();
@@ -68,9 +67,10 @@ public class GamePanel extends JPanel implements Runnable {
                 if (gameData.framePassed >= gameData.NEXT_DAY_FRAME) {
                     gameData.framePassed = 0;
                 }
-
                 // Update game properties
                 update();
+                // Resets keys after the update
+                keyboard.resetTiggerKey();
                 // Draws the updated game (Learned from YouTube video)
                 repaint();
                 deltaTime -= 1;  // Reset the delta time for the next frame
@@ -112,7 +112,8 @@ public class GamePanel extends JPanel implements Runnable {
             switch (projectile.data.getId()) {
                 case COIN:
                     // The player will pick up the coin if they collides
-                    if (gameData.isInside(projectile, gameData.player)) {
+                    if (gameData.isInside(projectile, gameData.player.mount) &&
+                            projectile.data.curPickFrame >= projectile.data.maxPickDelay) {  // Prevents instant pick
                         gameData.player.moneyBag.addCoin(projectile);
                         gameData.allProjectiles.remove(projectile);
                     }

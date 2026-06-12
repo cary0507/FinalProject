@@ -44,7 +44,7 @@ public class Player extends Entity {
     public void update() {
         super.update();
         // Update player's actions based on key inputs while mounted
-        if (keyInput.downPressed) {
+        if (keyInput.downPressedOnce) {
             Projectile tossedCoin = moneyBag.tossCoin();
             if (tossedCoin != null) {
                 gamePanel.gameData.allProjectiles.add(tossedCoin);
@@ -59,6 +59,9 @@ public class Player extends Entity {
             mount.isFacingLeft = false;
             mount.x += (int) mount.maxSpeed;
         }
+        // Updates the dropping location
+        moneyBag.dropX = x;
+        moneyBag.dropY = y;
     }
 
     @Override

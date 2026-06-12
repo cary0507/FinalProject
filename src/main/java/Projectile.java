@@ -8,6 +8,7 @@ public class Projectile extends Entity {
     public int damage;
     public boolean isOutOfBound;  // When set to true, the projectile will fall through the water and disappear
 
+
     /**
      * Initializes the projectile with its position, hitbox dimensions, movement parameters, and vector components.
      *
@@ -70,6 +71,7 @@ public class Projectile extends Entity {
 
     public PickedItem getPicked(ItemData data) {
         PickedItem itemForm = new PickedItem(data);
+        itemForm.data.curPickFrame = 0;  // Resets the pick delay
         return itemForm;
     }
 
@@ -81,6 +83,11 @@ public class Projectile extends Entity {
             getDisplacement();
         } else {
             this.y = GamePanel.HORIZON - this.hitboxHeight;
+            this.accY = 0;
+            this.velY = 0;
+        }
+        if (data.curPickFrame < data.maxPickDelay) {
+            data.curPickFrame++;
         }
     }
 }

@@ -10,6 +10,8 @@ public class ItemData implements Serializable {
     public int iconXOffsetR;
     public int iconYOffsetR;
     public boolean canPickUp;
+    public int maxPickDelay;  // Delay until the item can be pick up in frames
+    public int curPickFrame;
 
     /**
      * Constructor for PickedItem
@@ -23,6 +25,8 @@ public class ItemData implements Serializable {
         this.iconYOffsetR = iconYOffsetR * GamePanel.SCALE_PIXEL;
         this.itemIconPathL = itemIconPathL;
         this.itemIconPathR = itemIconPathR;
+        maxPickDelay = 2 * GamePanel.FPS;  // 2 seconds until the projectile can be pickup
+        curPickFrame = 0;
     }
 
     /**
@@ -32,6 +36,8 @@ public class ItemData implements Serializable {
         this.id = id;
         this.thrownImgPath = thrownImgPath;
         this.canPickUp = canPickUp;
+        maxPickDelay = 2 * GamePanel.FPS;  // 2 seconds until the projectile can be pickup
+        curPickFrame = 0;
     }
 
     public GameData.ItemID getId() {

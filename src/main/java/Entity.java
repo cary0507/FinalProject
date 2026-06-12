@@ -105,6 +105,12 @@ public class Entity implements Serializable {
      * Updates the in-game behavior (Movement, animation, etc.) of the entity.
      * */
     public void update() {
+        if (this.leftImages == null || this.rightImages == null) {
+            return;
+        }
+        if (this.leftImages.length == 0 || this.rightImages.length == 0) {
+            return;
+        }
         passedFrame++;
         int maxIndex;;
         if (isFacingLeft) {

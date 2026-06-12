@@ -2,6 +2,7 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Random;
 
 public class MoneyBag implements Serializable {
@@ -59,9 +60,10 @@ public class MoneyBag implements Serializable {
         if (!coins.isEmpty()) {
             PickedItem selectCoin = coins.remove(coins.size() - 1);
             // Convert into a projectile
-            Projectile tossedCoin = selectCoin.toss(dropX, dropY, GameData.UNIVERSAL_TOP_SPEED, gamePanel);
+            Projectile tossedCoin = selectCoin.toss(dropX, dropY, 20, gamePanel);
+            tossedCoin.setImagesFromPaths(tossedCoin.data.thrownImgPath, tossedCoin.data.thrownImgPath);
             tossedCoin.setMotionValues(
-                    0, -5,   // Throws the coin upwards
+                    0, -3 * GamePanel.SCALE_PIXEL,   // Throws the coin upwards
                     0, GameData.GRAVITY,
                     0, false
             );
@@ -70,6 +72,9 @@ public class MoneyBag implements Serializable {
         return null;  // No coins to toss
     }
 
+    /**
+     * Draws the bag icon with specific capacity size to the right corner of the screen
+     * */
     public void render(Graphics2D g2d) {
         int screenRight = GamePanel.PANEL_WIDTH - 20 * GamePanel.SCALE_PIXEL;
         int screenTop = 20 * GamePanel.SCALE_PIXEL;

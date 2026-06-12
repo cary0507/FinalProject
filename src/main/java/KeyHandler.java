@@ -9,6 +9,7 @@ import java.awt.event.KeyListener;
 
 public class KeyHandler implements KeyListener {
     public boolean downPressed, leftPressed, rightPressed, escPressed;
+    public boolean downPressedOnce;
 
     @Override
     public void keyTyped(KeyEvent e) {
@@ -30,6 +31,8 @@ public class KeyHandler implements KeyListener {
             rightPressed = true;
         }
         if (key == KeyEvent.VK_DOWN || key == KeyEvent.VK_S) {
+            // Only triggers once
+            downPressedOnce = !downPressed;
             downPressed = true;
         }
         if (key == KeyEvent.VK_ESCAPE) {
@@ -53,9 +56,14 @@ public class KeyHandler implements KeyListener {
         }
         if (key == KeyEvent.VK_DOWN || key == KeyEvent.VK_S) {
             downPressed = false;
+            downPressedOnce = false;
         }
         if (key == KeyEvent.VK_ESCAPE) {
             escPressed = false;
         }
+    }
+
+    public void resetTiggerKey() {
+        downPressedOnce = false;
     }
 }
