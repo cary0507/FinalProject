@@ -86,18 +86,22 @@ public class GamePanel extends JPanel implements Runnable {
         }
     }
 
+    /**
+     * Handles the interactions between projectiles and other objects
+     * */
     public void updateProjectiles () {
         for (int i = 0; i < gameData.allProjectiles.size(); i++) {
             Projectile projectile = gameData.allProjectiles.get(i);
             projectile.update();
             // Check if this projectile is a coin
             if (Objects.requireNonNull(projectile.data.getId()) == GameData.ItemID.COIN) {
-                // The player will pick up the coin if they collides
+                // The player will pick up the coin if they collide and the coin is not in pickup delay
                 if (GameData.isInside(projectile, gameData.player.mount) &&
                         projectile.data.curPickFrame >= projectile.data.maxPickDelay) {  // Prevents instant pick
                     gameData.player.moneyBag.addCoin(projectile);
                     gameData.allProjectiles.remove(projectile);
                 }
+                // Humans can pick up coin only if they have space for their money bag
                 for (Human human : gameData.allHumans) {
                     if (GameData.isInside(human, projectile) &&
                             human.moneyBag.capacity > human.moneyBag.numCoins) {
@@ -115,23 +119,30 @@ public class GamePanel extends JPanel implements Runnable {
      * */
     public void update() {
         Random rand = new Random();
+        // Determines the stage of the day
+        boolean isNight;
         // Updates background
         gameData.changeSkyColor(MAX_BLUE, MIN_BLUE, RED_DIFF, GREEN_DIFF);  // Sky
         if (gameData.framePassed < gameData.NIGHT_FRANE) {  // Noon
             // Sun's orbit
             gameData.sun.update(gameData.framePassed);
+            isNight = false;
         } else if (gameData.framePassed == gameData.NIGHT_FRANE) {  // At Night
             // Choose a random portal to spawn enemy
             int bound = gameData.allPortals.size();
             int choice = rand.nextInt(bound);
+            isNight = true;
             gameData.allEnemies.addAll(gameData.allPortals.get(choice).generateEnemies());
         } else {  // Night
             // Moon's orbit
             int sinceNight = gameData.framePassed - gameData.NIGHT_FRANE;
             gameData.moon.update(sinceNight);
+            isNight = true;
         }
+
         // Update player data
         gameData.player.update();
+
         // Update each mount
         for (int i = 0; i < gameData.allMounts.size(); i++) {
             Mountable mount = gameData.allMounts.get(i);
@@ -139,6 +150,10 @@ public class GamePanel extends JPanel implements Runnable {
         }
 
         // Update each structure
+        for (int i = 0; i < gameData.allContainers.size(); i++) {
+            ContainerStruct container = gameData.allContainers.get(i);
+            container.update();
+        }
         for (int i = 0; i < gameData.allUpgradable.size(); i++) {
             UpgradableStruct upgradeStruct = gameData.allUpgradable.get(i);
             upgradeStruct.update();
@@ -149,13 +164,21 @@ public class GamePanel extends JPanel implements Runnable {
         // Update each human
         for (int i = 0; i < gameData.allHumans.size(); i++) {
             Human human = gameData.allHumans.get(i);
-            human.update();
+            // Set the habitate
+            switch (human.id) {
+                case FUGITIVE:
+                case VILLAGER:
+                case FARMER:   // Fall through
+                    human.habitat = gameData.townCenter;
+                    break;
+            }
+            human.update(isNight);
         }
 
         // Update each enemy
         for (int i = 0; i < gameData.allEnemies.size(); i++) {
             Enemy enemy = gameData.allEnemies.get(i);
-            enemy.update();
+            enemy.update(gameData.player);
         }
 
         // Update each chunk
@@ -183,13 +206,20 @@ public class GamePanel extends JPanel implements Runnable {
             gameData.sun.render(g2d, 40 * SCALE_PIXEL, 40 * SCALE_PIXEL, Color.WHITE);
         } else {
             Color moonColor = new Color(133, 147, 154);
-            gameData.moon.render(g2d, 40 * SCALE_PIXEL, 40 * SCALE_PIXEL, moonColor);
+            gameData.moon.render(g2d, 35 * SCALE_PIXEL, 35 * SCALE_PIXEL, moonColor);
         }
         // Draw river front
-        Color riverColor = new Color(64, 112, 129);
+        Color riverColor = new Color(93, 112, 106);
         g2d.setColor(riverColor);
         g2d.fillRect(0, HORIZON + 120, GamePanel.PANEL_WIDTH, 50);
         // Renders all structures
+        for (ContainerStruct container : gameData.allContainers) {
+            container.render(g2d, gameData.camera);
+            if (GameData.isInside(container, gameData.player.mount) &&
+                    container.numItems < container.containing.length) {
+                container.renderHint(g2d, gameData.camera);
+            }
+        }
         for (UpgradableStruct upgradeStruct : gameData.allUpgradable) {
             upgradeStruct.render(g2d, gameData.camera);
             if (GameData.isInside(upgradeStruct, gameData.player.mount) &&
@@ -211,7 +241,7 @@ public class GamePanel extends JPanel implements Runnable {
         }
         // Render the player
         gameData.player.render(g2d, gameData.camera);
-        gameData.player.moneyBag.render(g2d);
+        // Render the projectiles
         for (Projectile projectile : gameData.allProjectiles) {
             projectile.render(g2d, gameData.camera);
         }

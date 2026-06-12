@@ -5,6 +5,7 @@ public class ContainerStruct extends Structure {
     public Entity[] containing;
     public int[][] relativePos;  // Stored x and y positions to anchor entities to the structure
     BufferedImage payImg;
+    public int numItems;
 
     /**
      * Initializes the structure with its position, hitbox dimensions, health points, and the entities it contains.
@@ -18,6 +19,7 @@ public class ContainerStruct extends Structure {
             this.containing = null;
         }
         payImg = GameData.pathToImage(GameData.payHint[0]);
+        numItems = 0;
     }
 
     /**
@@ -42,11 +44,13 @@ public class ContainerStruct extends Structure {
         if (containing == null || relativePos == null) {
             return;
         }
+        numItems = 0;
         int x = 0, y = 1;  // Too lazy to create a Coordinate class
         for (int i = 0; i < containing.length; i++) {
             if (containing[i] != null) {
                 containing[i].x = this.x + relativePos[i][x];
                 containing[i].y = this.y + relativePos[i][y];
+                numItems++;
             }
         }
     }

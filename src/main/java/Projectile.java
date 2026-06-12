@@ -87,7 +87,7 @@ public class Projectile extends Entity {
             this.velY = 0;
         }
         if (data.curPickFrame < data.maxPickDelay) {
-            data.curPickFrame++;
+            data.curPickFrame++;  // Counts up
         }
     }
 }

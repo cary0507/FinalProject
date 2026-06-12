@@ -77,5 +77,6 @@ public class Player extends Entity {
     public void render(Graphics2D g2, Camera referenceCam) {
         super.render(g2, referenceCam);
         super.renderItem(g2, referenceCam);
+        moneyBag.render(g2);
     }
 }

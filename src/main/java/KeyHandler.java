@@ -9,7 +9,7 @@ import java.awt.event.KeyListener;
 
 public class KeyHandler implements KeyListener {
     public boolean downPressed, leftPressed, rightPressed, escPressed;
-    public boolean downPressedOnce;
+    public boolean downPressedOnce;  // Activate only once per press
 
     @Override
     public void keyTyped(KeyEvent e) {

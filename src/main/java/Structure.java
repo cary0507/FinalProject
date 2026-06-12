@@ -1,8 +1,9 @@
+import java.util.ArrayList;
+
 public class Structure extends Entity {
     public int maxHP;
     public int curHP;
     public GameData.StructureID id;
-    public GameData.ItemID[] blockedID;
 
     /**
      * Initializes the structure with its position, dimensions, hit points, and image path.
@@ -19,13 +20,6 @@ public class Structure extends Entity {
         this.maxHP = maxHP;
         this.curHP = maxHP;
         this.id = id;
-    }
-
-    /**
-     * Determines Entity with which IDs cannot go through
-     * */
-    public void setBlockedID(GameData.ItemID[] blockedID) {
-        this.blockedID = blockedID;
     }
 
     /**

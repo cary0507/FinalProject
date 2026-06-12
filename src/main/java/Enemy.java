@@ -35,14 +35,19 @@ public class Enemy extends Entity {
     /**
      * Tracks the player
      * */
-    public void update(Player player) {
-        int playerCenterX = player.mount.x + player.mount.hitboxWidth / 2;
-        if (x <= playerCenterX) {
+    public void update(Entity target) {
+        if (GameData.isInside(this, target)) {
+            return;
+        }
+        if (x <= GameData.getCenterX(target)) {
             isFacingLeft = false;
             x += (int) maxSpeed;
         } else {
             isFacingLeft = true;
             x -= (int) maxSpeed;
+        }
+        if (curCooldown < dmgCooldown) {
+            curCooldown++;
         }
     }
 }

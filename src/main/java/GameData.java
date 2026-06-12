@@ -91,12 +91,25 @@ public class GameData implements Serializable {
     public static String[] enemyImgR = {
             "/raw images/Greedling/Greedling R.png"
     };
+    public static String[] bowShopImg = {
+            "/raw images/vendor/bow shop.png"
+    };
+    public static String[] sickleShopImg = {
+            "/raw images/vendor/sickle shop.png"
+    };
+    public static String[] bowItemImg = {
+            "raw images/Items/bow.png"
+    };
+    public static String[] sickleItemImg = {
+            "raw images/Items/bow.png"
+    };
     // Object IDs
     public enum ItemID {
         CROWN,
         COIN,
         BOW,
-        HAMMER,
+        SICKLE,
+        ARROW
     }
     public enum JobID {
         FUGITIVE,
@@ -111,14 +124,10 @@ public class GameData implements Serializable {
     }
     public enum StructureID {
         TOWN_CENTER,
-        GRASS,
         WALL,
-        ARCHERY_TOWER,
-        PORTAL,
-        CAMP,
-        HORSE_CORRAL,
         BOW_SHELF,
-        HAMMER_SHELF
+        SICKLE_SHELF,
+        PORTAL
     }
     // Real time in seconds
     public int framePassed;             // Frames passed in real life
@@ -141,7 +150,9 @@ public class GameData implements Serializable {
     public UpgradableStruct townCenter;
     public ArrayList<PickedItem> allPickedItems;
     public ArrayList<Human> allHumans;
+    // Do not mix
     public ArrayList<UpgradableStruct> allUpgradable;
+    public ArrayList<ContainerStruct> allContainers;
     public ArrayList<Portal> allPortals;
     public ArrayList<Enemy> allEnemies;
     public ArrayList<Projectile> allProjectiles;
@@ -186,6 +197,7 @@ public class GameData implements Serializable {
         allHumans = new ArrayList<>();
         allChunks = new ArrayList<>();
         allUpgradable = new ArrayList<>();
+        allContainers = new ArrayList<>();
         allPortals = new ArrayList<>();
         allEnemies = new ArrayList<>();
         allProjectiles = new ArrayList<>();
@@ -253,12 +265,16 @@ public class GameData implements Serializable {
         return coin;
     }
 
+    /**
+     * Spawns a default NPC
+     * */
     public Human spawnNPC(int x) {
         Human npc = new Human(x, GamePanel.HORIZON, NPC_TOP_SPEED, townCenter, gamePanel);
         npc.setImagesFromPaths(humanImgL, humanImgR);
         npc.y -= npc.hitboxHeight;
         return npc;
     }
+
     /**
      * Create a wall to the right of the spawn chunk
      * */
@@ -273,6 +289,50 @@ public class GameData implements Serializable {
         wallRight.x -= wallRight.hitboxWidth;   // Align right
         wallRight.y -= wallRight.hitboxHeight;  // Align bottom
         return wallRight;
+    }
+
+    /**
+     * Create a sickleShop aligning the left position
+     * */
+    private ContainerStruct getSickleShop(int leftX) {
+        // Offsets see "/sickle shop+sickle item reference.png"
+        int[][] sickleShopOffsets = {
+                {0, 26},
+                {14, 26},
+                {14 + 9, 26},
+                {14 + 9 + 9, 26}
+        };
+        ContainerStruct sickleShop = new ContainerStruct(
+                leftX - 50 * GamePanel.SCALE_PIXEL,
+                GamePanel.HORIZON,
+                0, StructureID.SICKLE_SHELF,
+                sickleShopOffsets, gamePanel
+        );
+        sickleShop.setImagesFromPaths(sickleShopImg, sickleShopImg);
+        sickleShop.y -= sickleShop.hitboxHeight; // Align bottom
+        return sickleShop;
+    }
+
+    /**
+     * Creates a bow shop aligning the right position
+     * */
+    private ContainerStruct getBowShop(int rightX) {
+        int[][] bowShopOffsets = {  // Determines the offest of elements in each cell
+                {0, 25},
+                {16, 25},
+                {16 + 10, 25},
+                {16 + 10 + 9, 25}
+        };
+        ContainerStruct bowShop = new ContainerStruct(
+                rightX + 50 * GamePanel.SCALE_PIXEL,
+                GamePanel.HORIZON,
+                0, StructureID.BOW_SHELF,
+                bowShopOffsets, gamePanel
+        );
+        bowShop.setImagesFromPaths(bowShopImg, bowShopImg);
+        bowShop.x -= bowShop.hitboxWidth;   // Align right
+        bowShop.y -= bowShop.hitboxHeight;  // Align bottom
+        return bowShop;
     }
 
     /**
@@ -343,13 +403,6 @@ public class GameData implements Serializable {
                 player = new Player(keyHandler, gamePanel, defaultHorse);
                 player.setImagesFromPaths(playerImgL, playerImgR);
 
-                // Drop 5 coins
-                int midX = curChunkX - curChunk.hitboxWidth / 2;
-                for (int n = 0; n < 5; n++) {
-                    int coinX = midX + 2 * GamePanel.SCALE_PIXEL * n;
-                    allProjectiles.add(getCoinOnGround(coinX));
-                }
-
                 // Create a default wall structure to the left of spawn
                 int leftX = curChunkX - curChunk.hitboxWidth + 10 * GamePanel.SCALE_PIXEL;
                 UpgradableStruct defaultWallL = getLeftWall(leftX);
@@ -364,10 +417,22 @@ public class GameData implements Serializable {
                 allHumans.add(spawnNPC(leftX + 70 * GamePanel.SCALE_PIXEL));
                 allHumans.add(spawnNPC(leftX + 80 * GamePanel.SCALE_PIXEL));
 
+                // Create the item shops
+                ContainerStruct sickleShop = getSickleShop(leftX);
+                allContainers.add(sickleShop);
+                ContainerStruct bowShop = getBowShop(rightX);
+                allContainers.add(bowShop);
+
+                // Drop 5 coins
+                int midX = curChunkX - curChunk.hitboxWidth / 2;
+                for (int n = 0; n < 5; n++) {
+                    int coinX = midX + 2 * GamePanel.SCALE_PIXEL * n;
+                    allProjectiles.add(getCoinOnGround(coinX));
+                }
+
                 // Create the town center
-                int chunkMid = curChunkX - (int) (curChunk.hitboxWidth / 2);
                 this.townCenter = new UpgradableStruct(
-                        chunkMid, GamePanel.HORIZON, StructureID.TOWN_CENTER, null, gamePanel
+                        midX, GamePanel.HORIZON, StructureID.TOWN_CENTER, null, gamePanel
                 );
                 this.townCenter.setImagesFromPaths(townCenterImg, townCenterImg);  // Never turns and always at middle
                 this.townCenter.x -= (int) (this.townCenter.hitboxWidth / 2);  // Align center
@@ -458,16 +523,36 @@ public class GameData implements Serializable {
         return isInside(obj1.x, obj1.y, right1, bottom1, obj2.x, obj2.y, right2, bottom2);
     }
 
+    /**
+     * Calculate the center x coordinate of an object
+     */
+    public static int getCenterX(Entity obj) {
+        return (int) (obj.x + obj.hitboxWidth / 2);
+    }
+
+    /**
+     * Set the center x coordinate of an object
+     * */
+    public static void setCenterX(Entity obj, int newCenterX) {
+        obj.x = newCenterX - obj.hitboxWidth / 2;
+    }
+
+    /**
+     * Get the distance between 2 x values
+     * */
     public static int getDist(int x1, int x2) {
         return Math.abs(x1 - x2);
     }
 
+    /**
+     * Get the distance between 2 objects
+     * */
     public static int getDist(Entity obj1, Entity obj2) {
         if (obj1 == obj2) {
             return 0;
         }
-        int center1 = obj1.x + obj1.hitboxWidth;
-        int center2 = obj2.x + obj2.hitboxWidth;
+        int center1 = getCenterX(obj1);
+        int center2 = getCenterX(obj2);
         return getDist(center1, center2);
     }
 

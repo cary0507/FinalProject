@@ -33,19 +33,21 @@ public class Human extends Entity {
     }
 
     public void goHme() {
-        if (GameData.getDist(this, this.habitat) >= 50 * GamePanel.SCALE_PIXEL) {
-            if (this.x < this.habitat.x) {
-                this.isFacingLeft = false;
-                this.x += (int) this.maxSpeed;
-            } else  {
-                this.isFacingLeft = true;
-                this.x -= (int) this.maxSpeed;
-            }
+        if (this.habitat == null) {
+            return;
+        }
+        if (GameData.getDist(this, this.habitat) <= this.maxSpeed) {  // Anchors, if their distance is close enough
+            GameData.setCenterX(this, GameData.getCenterX(this.habitat));
+        } else if (GameData.getCenterX(this) < GameData.getCenterX(this.habitat)) {
+            this.isFacingLeft = false;
+            this.x += (int) this.maxSpeed;
+        } else if (GameData.getCenterX(this) > GameData.getCenterX(this.habitat)) {
+            this.isFacingLeft = true;
+            this.x -= (int) this.maxSpeed;
         }
     }
 
-    @Override
-    public void update() {
+    public void update(boolean isNight) {
         Random rand = new Random();
         imgIndex = id.ordinal();
         // Different job behaves differently
@@ -67,19 +69,23 @@ public class Human extends Entity {
                 moneyBag.capacity = 11;
                 break;
         }
-        int rollWander = rand.nextInt(wanderChance);
-        if (rollWander == 67) {
-            int randDir = rand.nextInt(2);
-            if (randDir == 0) {
-                isFacingLeft = true;
-            } else {
-                isFacingLeft = false;
+        if (isNight) {
+            goHme();  // Head back to habitat during night time
+        } else {
+            int rollWander = rand.nextInt(wanderChance);
+            if (rollWander == 67) {
+                int randDir = rand.nextInt(2);
+                if (randDir == 0) {
+                    isFacingLeft = true;
+                } else {
+                    isFacingLeft = false;
+                }
+                wanderFrame = rand.nextInt(maxWanderFrame);
             }
-            wanderFrame = rand.nextInt(maxWanderFrame);
+            if (wanderFrame > 0) {
+                wanderFrame--;
+            }
+            wander();
         }
-        if (wanderFrame > 0) {
-            wanderFrame--;
-        }
-        wander();
     }
 }
