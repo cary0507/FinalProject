@@ -53,11 +53,20 @@ public class Player extends Entity {
         if (keyInput.leftPressed) {
             isFacingLeft = true;
             mount.isFacingLeft = true;
-            mount.x -= (int) mount.maxSpeed;
+            // Makes the player inside the bound
+            if (mount.x - (int) mount.curSpeed > gamePanel.leftBound) {
+                mount.x -= (int) mount.curSpeed;
+            } else {
+                mount.x = gamePanel.leftBound;
+            }
         } else if (keyInput.rightPressed) {
             isFacingLeft = false;
             mount.isFacingLeft = false;
-            mount.x += (int) mount.maxSpeed;
+            if (mount.x + (int) mount.curSpeed + mount.hitboxWidth< gamePanel.rightBound) {
+                mount.x += (int) mount.curSpeed;
+            } else {
+                mount.x = gamePanel.rightBound -  mount.hitboxWidth;
+            }
         }
         // Updates the dropping location
         moneyBag.dropX = x;

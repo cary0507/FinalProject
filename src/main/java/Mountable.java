@@ -25,6 +25,7 @@ public class Mountable extends Entity {
         this.MAX_STAMINA = maxStamina;
         this.stamina = maxStamina;
         this.isFrightened = false;
+        curSpeed = maxSpeed;
     }
 
     /**

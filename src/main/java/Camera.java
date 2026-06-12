@@ -22,8 +22,8 @@ public class Camera implements Serializable {
         this.gamePanel = gamePanel;
         this.x = x;
         this.y = y;
-        this.width = gamePanel.PANEL_WIDTH;
-        this.height = gamePanel.PANEL_HEIGHT;
+        this.width = GamePanel.PANEL_WIDTH;
+        this.height = GamePanel.PANEL_HEIGHT;
         this.deadZoneWidth = deadZoneWidth;
         this.deadZoneHeight = deadZoneHeight;
     }

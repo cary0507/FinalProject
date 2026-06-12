@@ -1,7 +1,7 @@
 public class Enemy extends Entity {
     public int hp;
     public int damage;
-    public int dmgCooldown;  // Time in milliseconds between attacks
+    public int dmgCooldown;  // Time in frames between attacks
     public int curCooldown;
 
     /**
@@ -15,6 +15,7 @@ public class Enemy extends Entity {
      */
     public Enemy(int x, int y, double maxSpeed, GamePanel gamePanel) {
         super(x, y, maxSpeed, gamePanel);
+        setImagesFromPaths(GameData.enemyImgL, GameData.enemyImgR);
     }
 
     /**

@@ -7,7 +7,7 @@ import java.util.Random;
 
 public class MoneyBag implements Serializable {
     private final ArrayList<PickedItem> coins;
-    public final int capacity;
+    public int capacity;
     public String[] imagePaths;
     public int dropX;
     public int dropY;

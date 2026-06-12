@@ -12,6 +12,10 @@ public class GamePanel extends JPanel implements Runnable {
     public static final int PANEL_HEIGHT = 840;
     public static final int HORIZON = PANEL_HEIGHT - 300;
     public static final int SCALE_PIXEL = 4;  // Pixel sizes of a square tile (Learned from YouTube)
+    public int leftBound;
+    public int rightBound;
+    // Game state
+    public boolean paused = false;
     // Time
     final int SEC_IN_NANO = 1_000_000_000;  // 1_000_000_000 nanosecond = 1 second
     public static final int FPS = 60;
@@ -38,6 +42,8 @@ public class GamePanel extends JPanel implements Runnable {
         this.setFocusable(true);  // Focus on this game panel
         // Setup saved game data
         gameData = new GameData(keyboard, this);
+        leftBound = gameData.leftBound;
+        rightBound = gameData.rightBound;
     }
 
     public void startGameThread() {
@@ -138,6 +144,11 @@ public class GamePanel extends JPanel implements Runnable {
             Chunk chunk = gameData.allChunks.get(i);
             chunk.update(gameData.player);
         }
+
+        for (int i = 0; i < gameData.allPortals.size(); i++) {
+            Portal portal = gameData.allPortals.get(i);
+            portal.update();
+        }
         // The order of the update matters because if camera is updated first, it will take some delay for the camera
         // to focus on the main objects again
         gameData.camera.focusOn(gameData.player.mount);  // Update camera
@@ -160,28 +171,43 @@ public class GamePanel extends JPanel implements Runnable {
             Color moonColor = new Color(133, 147, 154);
             gameData.moon.render(g2d, 40 * SCALE_PIXEL, 40 * SCALE_PIXEL, moonColor);
         }
+        // Draw river frotn
+        Color riverColor = new Color(64, 112, 129);
+        g2d.setColor(riverColor);
+        g2d.fillRect(0, HORIZON + 120, GamePanel.PANEL_WIDTH, 50);
         // Renders all structures
         for (Structure structure : gameData.allStructures) {
             structure.render(g2d, gameData.camera);
         }
+        // Renders all NPC
         for (Human human : gameData.allHumans) {
             human.render(g2d, gameData.camera);
         }
+        // Render all enemies
         for (Enemy enemy: gameData.allEnemies) {
             enemy.render(g2d, gameData.camera);
         }
-        // Renders all mounts
+        // Render all mounts
         for (Mountable mount : gameData.allMounts) {
             mount.render(g2d, gameData.camera);
         }
-        // Renders the player
+        // Render the player
         gameData.player.render(g2d, gameData.camera);
         gameData.player.moneyBag.render(g2d);
         for (Projectile projectile : gameData.allProjectiles) {
             projectile.render(g2d, gameData.camera);
         }
+        // Render second layer of river
+        g2d.setColor(riverColor);
+        g2d.fillRect(0, HORIZON + 170, GamePanel.PANEL_WIDTH, 140);
+        // Render chunks
         for (Chunk chunk : gameData.allChunks) {
             chunk.render(g2d, gameData.camera);
+        }
+        // Render all portals
+        for (int i = 0; i < gameData.allPortals.size(); i++) {
+            Portal portal = gameData.allPortals.get(i);
+            portal.render(g2d, gameData.camera);
         }
         // Dispose of the graphics context to free up resources
         g2d.dispose();

@@ -10,6 +10,9 @@ public class GameData implements Serializable {
     private static final long serialVersionUID = 1L;
     public static final double GRAVITY = 1.5;
     public static final double UNIVERSAL_TOP_SPEED = 6.0;
+    public static final double NPC_TOP_SPEED = 4.0;
+    public static final double VAGRANT_TOP_SPEED = 1.0;
+    public static final double ENEMY_TOP_SPEED = 5.0;
     // Image paths
     public static String[] playerImgL = {
             "/raw images/Player/king left.png",
@@ -59,6 +62,30 @@ public class GameData implements Serializable {
             "/raw images/Town center/lvl1/Town center lvl1 anim1.png",
             "/raw images/Town center/lvl2/Town center lvl 2 1.png"
     };
+    public static String[] humanImgL = {
+            "/raw images/NPC/vagrant L.png",
+            "/raw images/NPC/Villager L.png",
+            "/raw images/NPC/Farmer L.png",
+            "/raw images/NPC/Archer L.png"
+    };
+    public static String[] humanImgR = {
+            "/raw images/NPC/vagrant R.png",
+            "/raw images/NPC/Villager R.png",
+            "/raw images/NPC/Farmer R.png",
+            "/raw images/NPC/Archer R.png"
+    };
+    public static String[] portalImgL = {
+            "/raw images/Portal/Portal L.png",
+    };
+    public static String[] portalImgR = {
+            "/raw images/Portal/Portal R.png"
+    };
+    public static String[] enemyImgL = {
+            "/raw images/Greedling/Greedling L.png"
+    };
+    public static String[] enemyImgR = {
+            "/raw images/Greedling/Greedling R.png"
+    };
     // Object IDs
     public enum ItemID {
         CROWN,
@@ -69,9 +96,8 @@ public class GameData implements Serializable {
     public enum JobID {
         FUGITIVE,
         VILLAGER,
-        HUNTER,
-        BUILDER,
-        BANKER
+        ARCHER,
+        FARMER
     }
     public enum ChunkID {
         SPAWN_CHUNK,
@@ -100,14 +126,18 @@ public class GameData implements Serializable {
     Orbits sun;
     Orbits moon;
     public ArrayList<Chunk> allChunks;
+    public int leftBound = 200;
+    public int rightBound;
     // Game objects
     public GamePanel gamePanel;
     public KeyHandler keyHandler;
     public Camera camera;
     public Player player;
+    public UpgradableStruct townCenter;
     public ArrayList<PickedItem> allPickedItems;
     public ArrayList<Human> allHumans;
     public ArrayList<Structure> allStructures;
+    public ArrayList<Portal> allPortals;
     public ArrayList<Enemy> allEnemies;
     public ArrayList<Projectile> allProjectiles;
     public ArrayList<Mountable> allMounts;
@@ -151,6 +181,7 @@ public class GameData implements Serializable {
         allHumans = new ArrayList<>();
         allChunks = new ArrayList<>();
         allStructures = new ArrayList<>();
+        allPortals = new ArrayList<>();
         allEnemies = new ArrayList<>();
         allProjectiles = new ArrayList<>();
         allMounts = new ArrayList<>();
@@ -164,7 +195,7 @@ public class GameData implements Serializable {
         }
 
         // Setup camera
-        camera = new Camera(gamePanel, 0, 0, 400, 100);
+        camera = new Camera(gamePanel, 0, 0, 180, 100);
         // Set up the map and player with default mount
         int[] map = getLandCode(2, 2);
         initLand(map);
@@ -204,6 +235,9 @@ public class GameData implements Serializable {
         return wallLeft;  // Add object to game
     }
 
+    /**
+     * Drop a coin on the ground
+     * */
     public Projectile getCoinOnGround(int x) {
         ItemData coinData = new ItemData(ItemID.COIN, coinImg, true);
         Projectile coin = new Projectile(x, GamePanel.HORIZON, UNIVERSAL_TOP_SPEED, gamePanel, coinData);
@@ -214,6 +248,12 @@ public class GameData implements Serializable {
         return coin;
     }
 
+    public Human spawnNPC(int x) {
+        Human npc = new Human(x, GamePanel.HORIZON, NPC_TOP_SPEED, townCenter, gamePanel);
+        npc.setImagesFromPaths(humanImgL, humanImgR);
+        npc.y -= npc.hitboxHeight;
+        return npc;
+    }
     /**
      * Create a wall to the right of the spawn chunk
      * */
@@ -264,6 +304,12 @@ public class GameData implements Serializable {
         int curChunkX = 0;  // Acts like a cursor
         int midIndex = landCode.length / 2;
 
+        // Generate the left portal
+        Portal leftPortal = new Portal(0, GamePanel.HORIZON, gamePanel, false);
+        leftPortal.y -= leftPortal.hitboxHeight - 10 * GamePanel.SCALE_PIXEL;
+        allPortals.add(leftPortal);
+
+        // Loop through the code
         for (int i = 0; i < landCode.length; i++) {
             int code = landCode[i];
             // Set up the background chunk
@@ -277,7 +323,7 @@ public class GameData implements Serializable {
             // Parse different codes
             if (i < midIndex) {  // Left of the spawn left
                 int leftX = curChunkX - curChunk.hitboxWidth + (randGen.nextInt(150) + 80) * GamePanel.SCALE_PIXEL;
-                int rightX = curChunkX - (randGen.nextInt(30) + 80) * GamePanel.SCALE_PIXEL;
+                int rightX = curChunkX - (randGen.nextInt(30) + 100) * GamePanel.SCALE_PIXEL;
                 // Randomly add walls at different locations
                 allStructures.add(getLeftWall(leftX));
                 allStructures.add(getLeftWall(rightX));
@@ -295,7 +341,7 @@ public class GameData implements Serializable {
                 // Drop 5 coins
                 int midX = curChunkX - curChunk.hitboxWidth / 2;
                 for (int n = 0; n < 5; n++) {
-                    int coinX = midX + 20 * GamePanel.SCALE_PIXEL * n;
+                    int coinX = midX + 2 * GamePanel.SCALE_PIXEL * n;
                     allProjectiles.add(getCoinOnGround(coinX));
                 }
 
@@ -309,23 +355,35 @@ public class GameData implements Serializable {
                 UpgradableStruct defaultWallR = getRightWall(rightX);
                 allStructures.add(defaultWallR);
 
+                // Add 2 vagrants
+                allHumans.add(spawnNPC(leftX + 70 * GamePanel.SCALE_PIXEL));
+                allHumans.add(spawnNPC(leftX + 80 * GamePanel.SCALE_PIXEL));
+
                 // Create the town center
                 int chunkMid = curChunkX - (int) (curChunk.hitboxWidth / 2);
-                UpgradableStruct townCenter = new UpgradableStruct(
+                this.townCenter = new UpgradableStruct(
                         chunkMid, GamePanel.HORIZON, StructureID.TOWN_CENTER, null, gamePanel
                 );
-                townCenter.setImagesFromPaths(townCenterImg, townCenterImg);  // Never turns and always at middle
-                townCenter.x -= (int) (townCenter.hitboxWidth / 2);  // Align center
-                townCenter.y -= townCenter.hitboxHeight;             // Align bottom
-                allStructures.add(townCenter);
+                this.townCenter.setImagesFromPaths(townCenterImg, townCenterImg);  // Never turns and always at middle
+                this.townCenter.x -= (int) (this.townCenter.hitboxWidth / 2);  // Align center
+                this.townCenter.y -= this.townCenter.hitboxHeight;             // Align bottom
+                allStructures.add(this.townCenter);
             }
             else {  // Right of the spawn land
                 int leftX = curChunkX - curChunk.hitboxWidth + (randGen.nextInt(150) + 80) * GamePanel.SCALE_PIXEL;
-                int rightX = curChunkX - (randGen.nextInt(30) + 80) * GamePanel.SCALE_PIXEL;
+                int rightX = curChunkX - (randGen.nextInt(30) + 100) * GamePanel.SCALE_PIXEL;
                 allStructures.add(getRightWall(leftX));
                 allStructures.add(getRightWall(rightX));
             }
         }
+
+        // Generate the right portal
+        Portal rightPortal = new Portal(curChunkX, GamePanel.HORIZON, gamePanel, true);
+        rightPortal.x -= rightPortal.hitboxWidth;
+        rightPortal.y -= rightPortal.hitboxHeight - 10 * GamePanel.SCALE_PIXEL;
+        allPortals.add(rightPortal);
+
+        rightBound = curChunkX - 200;
     }
 
     /**
@@ -393,6 +451,19 @@ public class GameData implements Serializable {
         int bottom1 = obj1.y + obj1.hitboxHeight;
         int bottom2 = obj2.y + obj2.hitboxHeight;
         return isInside(obj1.x, obj1.y, right1, bottom1, obj2.x, obj2.y, right2, bottom2);
+    }
+
+    public static int getDist(int x1, int x2) {
+        return Math.abs(x1 - x2);
+    }
+
+    public static int getDist(Entity obj1, Entity obj2) {
+        if (obj1 == obj2) {
+            return 0;
+        }
+        int center1 = obj1.x + obj1.hitboxWidth;
+        int center2 = obj2.x + obj2.hitboxWidth;
+        return getDist(center1, center2);
     }
 
     /**
