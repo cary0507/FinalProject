@@ -69,7 +69,6 @@ public class ContainerStruct extends Structure {
 
     @Override
     public void update() {
-        super.update();
         anchorEntities();
     }
 

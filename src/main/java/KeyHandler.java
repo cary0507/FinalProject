@@ -10,6 +10,7 @@ import java.awt.event.KeyListener;
 public class KeyHandler implements KeyListener {
     public boolean downPressed, leftPressed, rightPressed, escPressed;
     public boolean downPressedOnce;  // Activate only once per press
+    public boolean escPressedOnce;   // Activate only once per ESC press (for toggles)
 
     @Override
     public void keyTyped(KeyEvent e) {
@@ -36,6 +37,9 @@ public class KeyHandler implements KeyListener {
             downPressed = true;
         }
         if (key == KeyEvent.VK_ESCAPE) {
+            // Toggle trigger: mark escPressed true and set one-shot flag so the game loop
+            // can consume the event exactly once for toggling pause/menu
+            escPressedOnce = !escPressed;
             escPressed = true;
         }
     }
@@ -60,10 +64,12 @@ public class KeyHandler implements KeyListener {
         }
         if (key == KeyEvent.VK_ESCAPE) {
             escPressed = false;
+            escPressedOnce = false;
         }
     }
 
     public void resetTiggerKey() {
         downPressedOnce = false;
+        escPressedOnce = false;
     }
 }

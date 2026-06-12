@@ -5,6 +5,8 @@
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.Objects;
 import java.util.Random;
 
@@ -18,6 +20,9 @@ public class GamePanel extends JPanel implements Runnable {
     public int rightBound;
     // Game state
     public boolean paused = false;
+    // Pause menu UI
+    private Rectangle resumeBtn, restartBtn, saveQuitBtn;
+    private Font pauseFont = new Font("Arial", Font.BOLD, 28);
     // Time
     final int SEC_IN_NANO = 1_000_000_000;  // 1_000_000_000 nanosecond = 1 second
     public static final int FPS = 60;
@@ -46,6 +51,46 @@ public class GamePanel extends JPanel implements Runnable {
         gameData = new GameData(keyboard, this);
         leftBound = gameData.leftBound;
         rightBound = gameData.rightBound;
+
+        // Setup pause menu buttons (centered)
+        int menuWidth = 360;
+        int menuHeight = 240;
+        int btnW = 260;
+        int btnH = 44;
+        int centerX = PANEL_WIDTH / 2;
+        int centerY = PANEL_HEIGHT / 2;
+        int menuLeft = centerX - menuWidth / 2;
+        int menuTop = centerY - menuHeight / 2;
+        int btnLeft = centerX - btnW / 2;
+        resumeBtn = new Rectangle(btnLeft, menuTop + 20, btnW, btnH);
+        restartBtn = new Rectangle(btnLeft, menuTop + 20 + btnH + 12, btnW, btnH);
+        saveQuitBtn = new Rectangle(btnLeft, menuTop + 20 + (btnH + 12) * 2, btnW, btnH);
+
+        // Mouse listener for pause menu buttons
+        this.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                if (!paused) return;
+                Point p = e.getPoint();
+                if (resumeBtn.contains(p)) {
+                    paused = false;
+                } else if (restartBtn.contains(p)) {
+                    // Restart the game by creating new GameData
+                    gameData = new GameData(keyboard, GamePanel.this);
+                    leftBound = gameData.leftBound;
+                    rightBound = gameData.rightBound;
+                    paused = false;
+                } else if (saveQuitBtn.contains(p)) {
+                    // Save and quit
+                    try {
+                        gameData.saveGame("src/main/resources/serialized/save.ser");
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
+                    System.exit(0);
+                }
+            }
+        });
     }
 
     public void startGameThread() {
@@ -70,13 +115,22 @@ public class GamePanel extends JPanel implements Runnable {
             lastTime = currentTime;
 
             if (deltaTime >= 1) {
-                // Store the current frame
-                gameData.framePassed+=10;
-                if (gameData.framePassed >= gameData.NEXT_DAY_FRAME) {
-                    gameData.framePassed = 0;
+                // Toggle pause when ESC is pressed once
+                if (keyboard.escPressedOnce) {
+                    paused = !paused;
+                    // consume the one-shot toggle
+                    keyboard.escPressedOnce = false;
                 }
-                // Update game properties
-                update();
+
+                // Update game properties (skip when paused)
+                if (!paused) {
+                    // Store the current frame
+                    gameData.framePassed+=10;
+                    if (gameData.framePassed >= gameData.NEXT_DAY_FRAME) {
+                        gameData.framePassed = 0;
+                    }
+                    update();
+                }
                 // Resets keys after the update
                 keyboard.resetTiggerKey();
                 // Draws the updated game (Learned from YouTube video)
@@ -101,29 +155,35 @@ public class GamePanel extends JPanel implements Runnable {
 
                     gameData.player.moneyBag.addCoin(projectile, gameData.player);
                     gameData.allProjectiles.remove(projectile);
+                    return;
                 }
                 // Humans can pick up coin only if they have space for their money bag
                 for (Human human : gameData.allHumans) {
                     if (GameData.isInside(human, projectile)
                             && human.moneyBag.capacity > human.moneyBag.numCoins
-                            && projectile.data.curPickFrame >= projectile.data.maxPickDelay) {
+                            && projectile.data.owner == gameData.player) {  // Can only pick up coins thrown by player
 
                         human.moneyBag.addCoin(projectile, human);
                         gameData.allProjectiles.remove(projectile);
-                        break;
+                        return;
                     }
                 }
                 // When the coin interacts with a tradable structure
                 for (UpgradableStruct upgradeStruct : gameData.allUpgradable) {
                     if (GameData.isInside(upgradeStruct, projectile)
                             // Check if the object can further level up
-                            && upgradeStruct.level < upgradeStruct.leftImages.length) {
+                            && upgradeStruct.level < upgradeStruct.maxLevel
+                            && projectile.data.owner == gameData.player) {
 
-                        // Calculate new hp
-                        int newHP = upgradeStruct.maxHP + 5 + 2 * upgradeStruct.level;
-                        upgradeStruct.levelUp(newHP);
-                        gameData.allUpgradable.remove(upgradeStruct);
-                        break;
+                        if (upgradeStruct.id == GameData.StructureID.TOWN_CENTER
+                                // Current maximum level is the town center level
+                                || upgradeStruct.level < gameData.townCenter.level) {
+                            // Calculate new hp
+                            int newHP = upgradeStruct.maxHP + 5 + 2 * upgradeStruct.level;
+                            upgradeStruct.levelUp(newHP);
+                            gameData.allProjectiles.remove(projectile);
+                            return;
+                        }
                     }
                 }
             }
@@ -246,7 +306,11 @@ public class GamePanel extends JPanel implements Runnable {
                     // If not at max level
                     && upgradeStruct.level < upgradeStruct.maxLevel) {
 
-                upgradeStruct.renderHint(g2d, gameData.camera);
+                if (upgradeStruct.id == GameData.StructureID.TOWN_CENTER
+                        // Current maximum level is the town center level
+                        || upgradeStruct.level < gameData.townCenter.level) {
+                    upgradeStruct.renderHint(g2d, gameData.camera);
+                }
             }
         }
 
@@ -286,7 +350,60 @@ public class GamePanel extends JPanel implements Runnable {
             Portal portal = gameData.allPortals.get(i);
             portal.render(g2d, gameData.camera);
         }
+        // If paused, render pause menu overlay and buttons on top
+        if (paused) {
+            // translucent background
+            Composite oldComp = g2d.getComposite();
+            g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.6f));  // Blurring effect
+            g2d.setColor(Color.BLACK);
+            g2d.fillRect(0, 0, PANEL_WIDTH, PANEL_HEIGHT);
+            g2d.setComposite(oldComp);
+
+            // Draw menu panel (simple border)
+            int menuW = 380;
+            int menuH = 260;
+            int mx = PANEL_WIDTH / 2 - menuW / 2;
+            int my = PANEL_HEIGHT / 2 - menuH / 2;
+            g2d.setColor(new Color(200, 200, 200));
+            g2d.fillRoundRect(mx, my, menuW, menuH, 12, 12);
+            g2d.setColor(Color.DARK_GRAY);
+            g2d.setStroke(new BasicStroke(3));
+            g2d.drawRoundRect(mx, my, menuW, menuH, 12, 12);
+
+            // Draw title
+            g2d.setFont(pauseFont);
+            g2d.setColor(Color.BLACK);
+            FontMetrics fm = g2d.getFontMetrics();
+            String title = "Paused";
+            int tx = PANEL_WIDTH / 2 - fm.stringWidth(title) / 2;
+            int ty = my + 40;
+            g2d.drawString(title, tx, ty);
+
+            // Draw buttons
+            drawButton(g2d, resumeBtn, "Resume");
+            drawButton(g2d, restartBtn, "Restart");
+            drawButton(g2d, saveQuitBtn, "Save & Quit");
+        }
+
         // Dispose of the graphics context to free up resources
         g2d.dispose();
+    }
+
+    // Helper to render a button
+    private void drawButton(Graphics2D g2d, Rectangle r, String text) {
+        Color fill = new Color(60, 120, 200);
+        g2d.setColor(fill);
+        g2d.fillRoundRect(r.x, r.y, r.width, r.height, 8, 8);
+        g2d.setColor(Color.BLACK);
+        g2d.setStroke(new BasicStroke(2));
+        g2d.drawRoundRect(r.x, r.y, r.width, r.height, 8, 8);
+        // Text
+        Font f = new Font("Arial", Font.BOLD, 20);
+        g2d.setFont(f);
+        FontMetrics fm = g2d.getFontMetrics();
+        int tx = r.x + (r.width - fm.stringWidth(text)) / 2;
+        int ty = r.y + (r.height - fm.getHeight()) / 2 + fm.getAscent();
+        g2d.setColor(Color.WHITE);
+        g2d.drawString(text, tx, ty);
     }
 }

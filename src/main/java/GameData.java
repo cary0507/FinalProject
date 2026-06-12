@@ -516,8 +516,8 @@ public class GameData implements Serializable {
         if (obj1 == obj2) {  // Same object
             return true;
         }
-        int right1 = obj1.x + obj1.hitboxHeight;
-        int right2 = obj2.x + obj2.hitboxHeight;
+        int right1 = obj1.x + obj1.hitboxWidth;
+        int right2 = obj2.x + obj2.hitboxWidth;
         int bottom1 = obj1.y + obj1.hitboxHeight;
         int bottom2 = obj2.y + obj2.hitboxHeight;
         return isInside(obj1.x, obj1.y, right1, bottom1, obj2.x, obj2.y, right2, bottom2);

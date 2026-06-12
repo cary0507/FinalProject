@@ -28,8 +28,10 @@ public class UpgradableStruct extends ContainerStruct {
         level++;
         maxHP = newHP;
         curHP = this.maxHP;
+        // Adjust new sizes
         this.hitboxWidth = leftImages[level].getWidth() * GamePanel.SCALE_PIXEL;
         this.hitboxHeight = leftImages[level].getHeight() * GamePanel.SCALE_PIXEL;
+        this.y = GamePanel.HORIZON - hitboxHeight;  // Adjust to align on bottom
     }
 
     /**
