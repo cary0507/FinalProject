@@ -326,6 +326,78 @@ public class GamePanel extends JPanel implements Runnable {
     }
 
     /**
+     * Update all enemies
+     * */
+    public void updateEnemies() {
+        for (int i = 0; i < gameData.allEnemies.size(); i++) {
+            Enemy enemy = gameData.allEnemies.get(i);
+            enemy.update(gameData.player);
+            // Enemy dies
+            if (enemy.hp <= 0) {
+                gameData.allEnemies.remove(enemy);
+            }
+            // Interaction with wall
+            for (UpgradableStruct upgrade : gameData.allUpgradable) {
+                if (upgrade.id == GameData.StructureID.WALL
+                        && upgrade.level > 0
+                        && upgrade.curHP > 0
+                        && GameData.isInside(enemy, upgrade)) {
+
+                    if (enemy.curCooldown <= 0) {
+                        upgrade.curHP -= enemy.damage;
+                        enemy.curCooldown = enemy.dmgCooldown;  // Reset attack cooldown
+                    }
+                    // Block the enemy
+                    if (enemy.isFacingLeft) {
+                        enemy.x = upgrade.x + upgrade.hitboxWidth;
+                    } else {
+                        enemy.x = upgrade.x - enemy.hitboxWidth;
+                    }
+                    return;
+                }
+            }
+            // Attacking player
+            if (GameData.isInside(enemy, gameData.player)) {
+                if (enemy.curCooldown <= 0) {
+                    if (gameData.player.moneyBag.numCoins < 1) {  // When player has no coin to block the attack
+                        lost = true;
+                    }
+                    Projectile coin = gameData.player.moneyBag.tossCoin("player");
+                    if (coin != null) {
+                        coin.isOutOfBound = true;  // Fall out of background
+                        gameData.allProjectiles.add(coin);
+                    }
+                    enemy.curCooldown = enemy.dmgCooldown;  // Reset attack cooldown
+                }
+                // Block the enemy
+                if (enemy.isFacingLeft) {
+                    enemy.x = gameData.player.x + enemy.hitboxWidth;
+                } else {
+                    enemy.x = gameData.player.x - enemy.hitboxWidth;
+                }
+                return;
+            }
+            // Attacking NPC
+            for (Human human : gameData.allHumans) {
+                if (human.id != GameData.JobID.FUGITIVE && GameData.isInside(human, enemy)) {
+                    if (enemy.curCooldown <= 0) {
+                        human.hp -= enemy.damage;
+                        enemy.curCooldown = enemy.dmgCooldown;  // Reset attack cooldown
+                    }
+                    // Block the enemy
+                    if (enemy.isFacingLeft) {
+                        enemy.x = human.x + human.hitboxWidth;
+                    } else {
+                        enemy.x = human.x - enemy.hitboxWidth;
+                    }
+                    return;
+                }
+            }
+
+        }
+    }
+
+    /**
      * Updates the game state, including player movement, enemy behavior, and other game logic.
      * */
     public void update() {
@@ -403,8 +475,8 @@ public class GamePanel extends JPanel implements Runnable {
                     gameData.allProjectiles.add(coin);
                 }
             }
+            // Attempt to attack enemy
             if (human.id == GameData.JobID.ARCHER) {
-                // Attempt to attack enemy
                 for (Enemy enemy : gameData.allEnemies) {
                     if (GameData.getDist(enemy, human) <= 400 * SCALE_PIXEL
                             && human.curShootCD <= 0) {
@@ -417,56 +489,26 @@ public class GamePanel extends JPanel implements Runnable {
                     }
                 }
             }
+            // Farmer is the player's main income
+            else if (human.id == GameData.JobID.FARMER
+                    && human.moneyBag.numCoins < human.moneyBag.capacity
+                    && gameData.framePassed == 0) {
+                // Every day generate 1 coin
+                ItemData coinData = new ItemData(
+                        GameData.ItemID.COIN, GameData.coinImg, GameData.coinImg, true
+                );
+                human.moneyBag.addCoin(
+                        new Projectile(0, 0, 20, this, coinData), "NPC"
+                );
+            }
+            else if (human.id == GameData.JobID.FUGITIVE
+                    && GameData.getDist(human, human.habitat) >= 100 * SCALE_PIXEL) {
+                human.goToDestination();
+            }
         }
 
         // Update each enemy
-        for (int i = 0; i < gameData.allEnemies.size(); i++) {
-            Enemy enemy = gameData.allEnemies.get(i);
-            enemy.update(gameData.player);
-            // Enemy dies
-            if (enemy.hp <= 0) {
-                gameData.allEnemies.remove(enemy);
-            }
-            for (UpgradableStruct upgrade : gameData.allUpgradable) {
-                // Interaction with wall
-                if (upgrade.id == GameData.StructureID.WALL
-                        && upgrade.level > 0
-                        && upgrade.curHP > 0
-                        && GameData.isInside(enemy, upgrade)) {
-
-                    if (enemy.curCooldown <= 0) {
-                        upgrade.curHP -= enemy.damage;
-                        enemy.curCooldown = enemy.dmgCooldown;  // Reset attack cooldown
-                    }
-                    // Block the enemy
-                    if (enemy.isFacingLeft) {
-                        enemy.x = upgrade.x + upgrade.hitboxWidth;
-                    } else {
-                        enemy.x = upgrade.x - enemy.hitboxWidth;
-                    }
-                    return;
-                }
-                if (GameData.isInside(enemy, gameData.player)) {
-                    if (enemy.curCooldown <= 0) {
-                        if (gameData.player.moneyBag.numCoins < 1) {  // When player has no coin to block the attack
-                            lost = true;
-                        }
-                        Projectile coin = gameData.player.moneyBag.tossCoin("player");
-                        if (coin != null) {
-                            coin.isOutOfBound = true;  // Fall out of background
-                            gameData.allProjectiles.add(coin);
-                        }
-                        enemy.curCooldown = enemy.dmgCooldown;  // Reset attack cooldown
-                    }
-                    // Block the enemy
-                    if (enemy.isFacingLeft) {
-                        enemy.x = gameData.player.x + enemy.hitboxWidth;
-                    } else {
-                        enemy.x = gameData.player.x - enemy.hitboxWidth;
-                    }
-                }
-            }
-        }
+        updateEnemies();
 
         // Update each chunk
         for (int i = 0; i < gameData.allChunks.size(); i++) {

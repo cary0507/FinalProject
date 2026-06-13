@@ -422,13 +422,13 @@ public class GameData implements Serializable {
                 allUpgradable.add(defaultWallR);
 
                 // Add 2 vagrants
-                allHumans.add(spawnNPC(leftX - 70 * GamePanel.SCALE_PIXEL));
-                allHumans.add(spawnNPC(leftX - 80 * GamePanel.SCALE_PIXEL));
+                allHumans.add(spawnNPC(leftX + 70 * GamePanel.SCALE_PIXEL));
+                allHumans.add(spawnNPC(leftX + 80 * GamePanel.SCALE_PIXEL));
 
                 // Create the item shops
-                ContainerStruct sickleShop = getSickleShop(leftX + 100 *  GamePanel.SCALE_PIXEL);
+                ContainerStruct sickleShop = getSickleShop(leftX - 100 *  GamePanel.SCALE_PIXEL);
                 allContainers.add(sickleShop);
-                ContainerStruct bowShop = getBowShop(rightX - 100 * GamePanel.SCALE_PIXEL);
+                ContainerStruct bowShop = getBowShop(rightX + 100 * GamePanel.SCALE_PIXEL);
                 allContainers.add(bowShop);
 
                 // Drop 8 coins
