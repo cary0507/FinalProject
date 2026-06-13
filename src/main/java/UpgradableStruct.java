@@ -39,6 +39,7 @@ public class UpgradableStruct extends ContainerStruct {
      * */
     @Override
     public void update() {
+        super.update();
         imgIndex = level;
         maxLevel = leftImages.length - 1;
     }

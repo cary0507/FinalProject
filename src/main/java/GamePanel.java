@@ -5,8 +5,7 @@
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.io.IOException;
 import java.util.Objects;
 import java.util.Random;
 
@@ -21,8 +20,11 @@ public class GamePanel extends JPanel implements Runnable {
     // Game state
     public boolean paused = false;
     // Pause menu UI
-    private Rectangle resumeBtn, restartBtn, saveQuitBtn;
-    private Font pauseFont = new Font("Arial", Font.BOLD, 28);
+    Rectangle resumeBtn;
+    Rectangle restartBtn;
+    Rectangle saveQuitBtn;
+    private final Font titleFont = new Font("Algerian", Font.BOLD, 48);
+    private final Font textFont = new Font("Algerian", Font.BOLD, 28);
     // Time
     final int SEC_IN_NANO = 1_000_000_000;  // 1_000_000_000 nanosecond = 1 second
     public static final int FPS = 60;
@@ -40,7 +42,7 @@ public class GamePanel extends JPanel implements Runnable {
     /**
      * Initializes the game panel with its dimensions, background color, and key listener.
      * */
-    public GamePanel() {
+    public GamePanel() throws IOException, ClassNotFoundException {
         // Set the preferred size of the panel (From YouTube)
         this.setPreferredSize(new Dimension(PANEL_WIDTH, PANEL_HEIGHT));
         this.setBackground(Color.BLACK);
@@ -49,48 +51,24 @@ public class GamePanel extends JPanel implements Runnable {
         this.setFocusable(true);  // Focus on this game panel
         // Setup saved game data
         gameData = new GameData(keyboard, this);
+        // Load the game
+        gameData = (GameData) gameData.loadGame("src/main/resources/serialized/save.ser");
+        gameData.resetTransient(this, keyboard);
         leftBound = gameData.leftBound;
         rightBound = gameData.rightBound;
 
-        // Setup pause menu buttons (centered)
-        int menuWidth = 360;
-        int menuHeight = 240;
+        // Setup pause menu buttons
         int btnW = 260;
         int btnH = 44;
-        int centerX = PANEL_WIDTH / 2;
-        int centerY = PANEL_HEIGHT / 2;
-        int menuLeft = centerX - menuWidth / 2;
-        int menuTop = centerY - menuHeight / 2;
-        int btnLeft = centerX - btnW / 2;
-        resumeBtn = new Rectangle(btnLeft, menuTop + 20, btnW, btnH);
-        restartBtn = new Rectangle(btnLeft, menuTop + 20 + btnH + 12, btnW, btnH);
-        saveQuitBtn = new Rectangle(btnLeft, menuTop + 20 + (btnH + 12) * 2, btnW, btnH);
+        int yGap = 80;
+        int btnTop = PANEL_HEIGHT / 2 + 20;
+        int btnLeft = 20;
+        resumeBtn = new Rectangle(btnLeft, btnTop, btnW, btnH);
+        restartBtn = new Rectangle(btnLeft, btnTop + btnH + yGap, btnW, btnH);
+        saveQuitBtn = new Rectangle(btnLeft, btnTop + (btnH + yGap) * 2, btnW, btnH);
 
         // Mouse listener for pause menu buttons
-        this.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mousePressed(MouseEvent e) {
-                if (!paused) return;
-                Point p = e.getPoint();
-                if (resumeBtn.contains(p)) {
-                    paused = false;
-                } else if (restartBtn.contains(p)) {
-                    // Restart the game by creating new GameData
-                    gameData = new GameData(keyboard, GamePanel.this);
-                    leftBound = gameData.leftBound;
-                    rightBound = gameData.rightBound;
-                    paused = false;
-                } else if (saveQuitBtn.contains(p)) {
-                    // Save and quit
-                    try {
-                        gameData.saveGame("src/main/resources/serialized/save.ser");
-                    } catch (Exception ex) {
-                        ex.printStackTrace();
-                    }
-                    System.exit(0);
-                }
-            }
-        });
+        addMouseListener(new PauseMenuMouseListener(this));
     }
 
     public void startGameThread() {
@@ -125,7 +103,7 @@ public class GamePanel extends JPanel implements Runnable {
                 // Update game properties (skip when paused)
                 if (!paused) {
                     // Store the current frame
-                    gameData.framePassed+=10;
+                    gameData.framePassed++;
                     if (gameData.framePassed >= gameData.NEXT_DAY_FRAME) {
                         gameData.framePassed = 0;
                     }
@@ -153,7 +131,7 @@ public class GamePanel extends JPanel implements Runnable {
                 if (GameData.isInside(projectile, gameData.player.mount)
                         && projectile.data.curPickFrame >= projectile.data.maxPickDelay) {  // Prevents instant pick
 
-                    gameData.player.moneyBag.addCoin(projectile, gameData.player);
+                    gameData.player.moneyBag.addCoin(projectile, "player");
                     gameData.allProjectiles.remove(projectile);
                     return;
                 }
@@ -161,30 +139,85 @@ public class GamePanel extends JPanel implements Runnable {
                 for (Human human : gameData.allHumans) {
                     if (GameData.isInside(human, projectile)
                             && human.moneyBag.capacity > human.moneyBag.numCoins
-                            && projectile.data.owner == gameData.player) {  // Can only pick up coins thrown by player
+                            // Can only pick up coins thrown by player
+                            && projectile.data.owner != null  // Order matters
+                            && projectile.data.owner.equalsIgnoreCase("player")) {
 
-                        human.moneyBag.addCoin(projectile, human);
+                        human.moneyBag.addCoin(projectile, "human");
                         gameData.allProjectiles.remove(projectile);
                         return;
                     }
                 }
-                // When the coin interacts with a tradable structure
+                // When the coin interacts with an upgradable structure
                 for (UpgradableStruct upgradeStruct : gameData.allUpgradable) {
                     if (GameData.isInside(upgradeStruct, projectile)
                             // Check if the object can further level up
                             && upgradeStruct.level < upgradeStruct.maxLevel
-                            && projectile.data.owner == gameData.player) {
+                            && projectile.data.owner != null
+                            && projectile.data.owner.equalsIgnoreCase("player")) {
 
                         if (upgradeStruct.id == GameData.StructureID.TOWN_CENTER
                                 // Current maximum level is the town center level
                                 || upgradeStruct.level < gameData.townCenter.level) {
+
+                            // Pay coin first may be safer
+                            gameData.allProjectiles.remove(projectile);
                             // Calculate new hp
                             int newHP = upgradeStruct.maxHP + 5 + 2 * upgradeStruct.level;
                             upgradeStruct.levelUp(newHP);
-                            gameData.allProjectiles.remove(projectile);
                             return;
                         }
                     }
+                }
+                // When the coin interacts with an item structure
+                for (ContainerStruct containerStruct : gameData.allContainers) {
+                    if (GameData.isInside(containerStruct, projectile)
+                            && containerStruct.numItems < containerStruct.containing.length
+                            && projectile.data.owner != null
+                            && projectile.data.owner.equalsIgnoreCase("player")) {
+
+                        // Pay coin first may be safer
+                        gameData.allProjectiles.remove(projectile);
+                        // Generate an item to the shelf
+                        switch (containerStruct.id) {
+                            case BOW_SHELF:
+                                // Sets up data
+                                ItemData bowItemData = new ItemData(
+                                        GameData.ItemID.BOW, GameData.bowItemImg, true
+                                );
+                                // Sets up item
+                                Projectile bowItem = new Projectile(
+                                        0, 0, GameData.UNIVERSAL_TOP_SPEED,
+                                        this, bowItemData
+                                );
+                                // Add item to data
+                                gameData.allProjectiles.add(bowItem);
+                                // Add item to shelf
+                                containerStruct.addEntity(bowItem);
+                                break;
+                            case SICKLE_SHELF:
+                                // Sets up data
+                                ItemData sickleItemData = new ItemData(
+                                        GameData.ItemID.SICKLE, GameData.sickleItemImg, true
+                                );
+                                // Sets up item
+                                Projectile sickleItem = new Projectile(
+                                        0, 0, GameData.UNIVERSAL_TOP_SPEED,
+                                        this, sickleItemData
+                                );
+                                // Add item to data
+                                gameData.allProjectiles.add(sickleItem);
+                                // Add item to shelf
+                                containerStruct.addEntity(sickleItem);
+                                break;
+                        }
+                        return;
+                    }
+                }
+            } else if (Objects.requireNonNull(projectile.data.getId()) == GameData.ItemID.BOW) {
+                // Villagers without a job can pick up
+                for (Human human : gameData.allHumans) {
+
                 }
             }
         }
@@ -204,7 +237,7 @@ public class GamePanel extends JPanel implements Runnable {
             gameData.sun.update(gameData.framePassed);
             isNight = false;
         } else if (gameData.framePassed == gameData.NIGHT_FRANE) {  // At Night
-            // Choose a random portal to spawn enemy
+            // ChobjOute a random portal to spawn enemy
             int bound = gameData.allPortals.size();
             int choice = rand.nextInt(bound);
             isNight = true;
@@ -245,7 +278,7 @@ public class GamePanel extends JPanel implements Runnable {
                 case FUGITIVE:
                 case VILLAGER:
                 case FARMER:   // Fall through
-                    human.habitat = gameData.townCenter;
+                    human.habitat = gameData.townCenter;  // They all live in town center
                     break;
             }
             human.update(isNight);
@@ -265,7 +298,65 @@ public class GamePanel extends JPanel implements Runnable {
         // The order of the update matters because if camera is updated first, it will take some delay for the camera
         // to focus on the main objects again
         gameData.camera.focusOn(gameData.player.mount);  // Update camera
+    }
 
+    /**
+     * Draws a button with customized name
+     * */
+    private void renderButton(Graphics2D g2d, Rectangle r, String text) {
+        // Background
+        Color fill = new Color(120, 71, 55);
+        g2d.setColor(fill);
+        g2d.fillRoundRect(r.x, r.y, r.width, r.height, 8, 8);
+        // Boarder
+        Color border = new Color(122, 115, 84);
+        g2d.setColor(border);
+        g2d.setStroke(new BasicStroke(4));
+        g2d.drawRoundRect(r.x, r.y, r.width, r.height, 8, 8);
+        // Name of the button
+        g2d.setFont(textFont);
+        FontMetrics fm = g2d.getFontMetrics();
+        int labelX = r.x + (r.width - fm.stringWidth(text)) / 2;
+        int labelY = r.y + (r.height - fm.getHeight()) / 2 + 30;
+        g2d.setColor(Color.WHITE);
+        g2d.drawString(text, labelX, labelY);
+    }
+
+    /**
+     * Draws the paused menu and title
+     * */
+    public void renderPauseMenu(Graphics2D g2d) {
+        // translucent background
+        Composite oldComp = g2d.getComposite();
+        g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.6f));  // Blurring effect
+        g2d.setColor(Color.BLACK);
+        g2d.fillRect(0, 0, PANEL_WIDTH, PANEL_HEIGHT);
+        g2d.setComposite(oldComp);
+
+        // Draw menu panel
+        int menuW = 300;
+        int menuH = PANEL_HEIGHT;
+        int menuX = 0;
+        int menuY = 0;
+        g2d.setColor(new Color(94, 49, 31));
+        g2d.fillRoundRect(menuX, menuY, menuW, menuH, 12, 12);
+        g2d.setColor(Color.DARK_GRAY);
+        g2d.setStroke(new BasicStroke(3));
+        g2d.drawRoundRect(menuX, menuY, menuW, menuH, 12, 12);
+
+        // Draw title
+        g2d.setFont(titleFont);
+        g2d.setColor(new Color(227, 190, 98));
+        FontMetrics fontMetrics = g2d.getFontMetrics();
+        String title = "Paused";
+        int textX = menuW / 2 - fontMetrics.stringWidth(title) / 2;
+        int textY = menuY + 40 * SCALE_PIXEL;
+        g2d.drawString(title, textX, textY);
+
+        // Draw buttons
+        renderButton(g2d, resumeBtn, "Resume");
+        renderButton(g2d, restartBtn, "Restart");
+        renderButton(g2d, saveQuitBtn, "Save & Quit");
     }
 
     /**
@@ -297,7 +388,7 @@ public class GamePanel extends JPanel implements Runnable {
                     // If shelf is not full
                     && container.numItems < container.containing.length) {
 
-                container.renderHint(g2d, gameData.camera);
+                container.renderHint(g2d, gameData.camera);  // Hints the player to toss a coin
             }
         }
         for (UpgradableStruct upgradeStruct : gameData.allUpgradable) {
@@ -324,6 +415,11 @@ public class GamePanel extends JPanel implements Runnable {
             enemy.render(g2d, gameData.camera);
         }
 
+        // Render the projectiles
+        for (Projectile projectile : gameData.allProjectiles) {
+            projectile.render(g2d, gameData.camera);
+        }
+
         // Render all mounts
         for (Mountable mount : gameData.allMounts) {
             mount.render(g2d, gameData.camera);
@@ -331,11 +427,6 @@ public class GamePanel extends JPanel implements Runnable {
 
         // Render the player
         gameData.player.render(g2d, gameData.camera);
-
-        // Render the projectiles
-        for (Projectile projectile : gameData.allProjectiles) {
-            projectile.render(g2d, gameData.camera);
-        }
 
         // Render second layer of river
         g2d.setColor(riverColor);
@@ -352,58 +443,10 @@ public class GamePanel extends JPanel implements Runnable {
         }
         // If paused, render pause menu overlay and buttons on top
         if (paused) {
-            // translucent background
-            Composite oldComp = g2d.getComposite();
-            g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.6f));  // Blurring effect
-            g2d.setColor(Color.BLACK);
-            g2d.fillRect(0, 0, PANEL_WIDTH, PANEL_HEIGHT);
-            g2d.setComposite(oldComp);
-
-            // Draw menu panel (simple border)
-            int menuW = 380;
-            int menuH = 260;
-            int mx = PANEL_WIDTH / 2 - menuW / 2;
-            int my = PANEL_HEIGHT / 2 - menuH / 2;
-            g2d.setColor(new Color(200, 200, 200));
-            g2d.fillRoundRect(mx, my, menuW, menuH, 12, 12);
-            g2d.setColor(Color.DARK_GRAY);
-            g2d.setStroke(new BasicStroke(3));
-            g2d.drawRoundRect(mx, my, menuW, menuH, 12, 12);
-
-            // Draw title
-            g2d.setFont(pauseFont);
-            g2d.setColor(Color.BLACK);
-            FontMetrics fm = g2d.getFontMetrics();
-            String title = "Paused";
-            int tx = PANEL_WIDTH / 2 - fm.stringWidth(title) / 2;
-            int ty = my + 40;
-            g2d.drawString(title, tx, ty);
-
-            // Draw buttons
-            drawButton(g2d, resumeBtn, "Resume");
-            drawButton(g2d, restartBtn, "Restart");
-            drawButton(g2d, saveQuitBtn, "Save & Quit");
+            renderPauseMenu(g2d);
         }
 
         // Dispose of the graphics context to free up resources
         g2d.dispose();
-    }
-
-    // Helper to render a button
-    private void drawButton(Graphics2D g2d, Rectangle r, String text) {
-        Color fill = new Color(60, 120, 200);
-        g2d.setColor(fill);
-        g2d.fillRoundRect(r.x, r.y, r.width, r.height, 8, 8);
-        g2d.setColor(Color.BLACK);
-        g2d.setStroke(new BasicStroke(2));
-        g2d.drawRoundRect(r.x, r.y, r.width, r.height, 8, 8);
-        // Text
-        Font f = new Font("Arial", Font.BOLD, 20);
-        g2d.setFont(f);
-        FontMetrics fm = g2d.getFontMetrics();
-        int tx = r.x + (r.width - fm.stringWidth(text)) / 2;
-        int ty = r.y + (r.height - fm.getHeight()) / 2 + fm.getAscent();
-        g2d.setColor(Color.WHITE);
-        g2d.drawString(text, tx, ty);
     }
 }

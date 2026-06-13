@@ -1,17 +1,21 @@
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.Serializable;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
 
 public class MoneyBag implements Serializable {
+    private static final long serialVersionUID = 1L;
     private final ArrayList<PickedItem> coins;
     public int capacity;
     public String[] imagePaths;
     public int dropX;
     public int dropY;
-    public GamePanel gamePanel;
+    public transient GamePanel gamePanel;
     public int imageIndex;
     public int numCoins;
 
@@ -35,7 +39,7 @@ public class MoneyBag implements Serializable {
      *
      * @param coin the coin to be added
      * */
-    public void addCoin(Projectile coin, Entity owner) {
+    public void addCoin(Projectile coin, String owner) {
         Random randGen = new Random();
         final int DROP_CHANCE = 2;  // 1/2 = 50% chance
 
@@ -60,7 +64,7 @@ public class MoneyBag implements Serializable {
      *
      * @return the coin that is removed
      * */
-    public Projectile tossCoin(Entity owner) {
+    public Projectile tossCoin(String owner) {
         if (!coins.isEmpty()) {
             PickedItem selectCoin = coins.remove(coins.size() - 1);
             // Convert into a projectile
@@ -103,5 +107,21 @@ public class MoneyBag implements Serializable {
         int scaledWidth = img.getWidth() * GamePanel.SCALE_PIXEL * 2;
         int scaledHeight = img.getHeight() * GamePanel.SCALE_PIXEL * 2;
         g2d.drawImage(img, screenRight, screenTop, scaledWidth, scaledHeight, null);
+    }
+
+    /**
+     * Custom deserialization to restore transient GamePanel
+     * gamePanel must be set externally after deserialization
+     * */
+    private void readObject(ObjectInputStream objIn) throws IOException, ClassNotFoundException {
+        objIn.defaultReadObject();
+        // gamePanel is transient and must be set by the caller
+    }
+
+    /**
+     * Custom serialization handler
+     * */
+    private void writeObject(ObjectOutputStream objOut) throws IOException {
+        objOut.defaultWriteObject();
     }
 }

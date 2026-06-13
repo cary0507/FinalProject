@@ -101,7 +101,7 @@ public class GameData implements Serializable {
             "raw images/Items/bow.png"
     };
     public static String[] sickleItemImg = {
-            "raw images/Items/bow.png"
+            "raw images/Items/sickle.png"
     };
     // Object IDs
     public enum ItemID {
@@ -142,9 +142,9 @@ public class GameData implements Serializable {
     public ArrayList<Chunk> allChunks;
     public int leftBound = 200;
     public int rightBound;
-    // Game objects
-    public GamePanel gamePanel;
-    public KeyHandler keyHandler;
+    // Game objects (transient because they're runtime references)
+    public transient GamePanel gamePanel;
+    public transient KeyHandler keyHandler;
     public Camera camera;
     public Player player;
     public UpgradableStruct townCenter;
@@ -238,21 +238,6 @@ public class GameData implements Serializable {
     }
 
     /**
-     * Create a wall to the left of the spawn chunk
-     * */
-    public UpgradableStruct getLeftWall(int alignLeftX) {
-        UpgradableStruct wallLeft = new UpgradableStruct(
-                alignLeftX, GamePanel.HORIZON,
-                GameData.StructureID.WALL, null,  // No one sit on the wall
-                gamePanel
-        );
-        wallLeft.isFacingLeft = true;  // Facing left
-        wallLeft.setImagesFromPaths(wallImgL, wallImgR);
-        wallLeft.y -= wallLeft.hitboxHeight;  // Align bottom
-        return wallLeft;  // Add object to game
-    }
-
-    /**
      * Drop a coin on the ground
      * */
     public Projectile getCoinOnGround(int x) {
@@ -273,6 +258,21 @@ public class GameData implements Serializable {
         npc.setImagesFromPaths(humanImgL, humanImgR);
         npc.y -= npc.hitboxHeight;
         return npc;
+    }
+
+    /**
+     * Create a wall to the left of the spawn chunk
+     * */
+    public UpgradableStruct getLeftWall(int alignLeftX) {
+        UpgradableStruct wallLeft = new UpgradableStruct(
+                alignLeftX, GamePanel.HORIZON,
+                GameData.StructureID.WALL, null,  // No one sit on the wall
+                gamePanel
+        );
+        wallLeft.isFacingLeft = true;  // Facing left
+        wallLeft.setImagesFromPaths(wallImgL, wallImgR);
+        wallLeft.y -= wallLeft.hitboxHeight;  // Align bottom
+        return wallLeft;  // Add object to game
     }
 
     /**
@@ -297,10 +297,10 @@ public class GameData implements Serializable {
     private ContainerStruct getSickleShop(int leftX) {
         // Offsets see "/sickle shop+sickle item reference.png"
         int[][] sickleShopOffsets = {
-                {0, 26},
                 {14, 26},
                 {14 + 9, 26},
-                {14 + 9 + 9, 26}
+                {14 + 9 + 9, 26},
+                {14 + 9 + 9 + 9, 26}
         };
         ContainerStruct sickleShop = new ContainerStruct(
                 leftX - 50 * GamePanel.SCALE_PIXEL,
@@ -317,11 +317,12 @@ public class GameData implements Serializable {
      * Creates a bow shop aligning the right position
      * */
     private ContainerStruct getBowShop(int rightX) {
+        // Reference: "src/main/resources/raw images/bow shop+bow item reference.png"
         int[][] bowShopOffsets = {  // Determines the offest of elements in each cell
-                {0, 25},
                 {16, 25},
                 {16 + 10, 25},
-                {16 + 10 + 9, 25}
+                {16 + 10 + 9, 25},
+                {16 + 10 + 9 + 9, 25}
         };
         ContainerStruct bowShop = new ContainerStruct(
                 rightX + 50 * GamePanel.SCALE_PIXEL,
@@ -418,9 +419,9 @@ public class GameData implements Serializable {
                 allHumans.add(spawnNPC(leftX + 80 * GamePanel.SCALE_PIXEL));
 
                 // Create the item shops
-                ContainerStruct sickleShop = getSickleShop(leftX);
+                ContainerStruct sickleShop = getSickleShop(leftX + 100 *  GamePanel.SCALE_PIXEL);
                 allContainers.add(sickleShop);
-                ContainerStruct bowShop = getBowShop(rightX);
+                ContainerStruct bowShop = getBowShop(rightX - 100 * GamePanel.SCALE_PIXEL);
                 allContainers.add(bowShop);
 
                 // Drop 5 coins
@@ -481,10 +482,93 @@ public class GameData implements Serializable {
         return loadedData;
     }
 
+    /**
+     * Custom deserialization to restore transient GamePanel and KeyHandler references
+     * This method is called automatically when the GameData object is deserialized
+     * */
+    private void readObject(ObjectInputStream objIn) throws IOException, ClassNotFoundException {
+        objIn.defaultReadObject();
+    }
+
+    /**
+     * Custom serialization handler
+     * Ensures that all necessary fields are properly serialized
+     * */
+    private void writeObject(ObjectOutputStream objOut) throws IOException {
+        objOut.defaultWriteObject();
+    }
+
+    /**
+     * Reinitialized transient fields after deserialization
+     *
+     * @param gamePanel the GamePanel instance for the game
+     * @param keyHandler the KeyHandler instance for the game
+     * */
+    public void resetTransient(GamePanel gamePanel, KeyHandler keyHandler) {
+        this.gamePanel = gamePanel;
+        this.keyHandler = keyHandler;
+
+        // Resets camera
+        if (camera != null) {
+            camera.gamePanel = gamePanel;  // Resets gamePanel
+        }
+        // Reset player's fields
+        if (player != null) {
+            player.gamePanel = gamePanel;
+            player.keyInput = keyHandler;           // Resets player keyboard input
+            player.moneyBag.gamePanel = gamePanel;  // Resets player's moneybag
+        }
+        // Resets all humans
+        for (Human human : allHumans) {
+            if (human != null) {
+                human.gamePanel = gamePanel;
+                if (human.moneyBag != null) {  // Reset
+                    human.moneyBag.gamePanel = gamePanel;
+                }
+            }
+        }
+        // Resets all upgradable structures
+        for (UpgradableStruct upgradableStruct : allUpgradable) {
+            if (upgradableStruct != null) {
+                upgradableStruct.gamePanel = gamePanel;
+            }
+        }
+        // Resets all container structures
+        for (ContainerStruct containerStruct : allContainers) {
+            if (containerStruct != null) {
+                containerStruct.gamePanel = gamePanel;
+            }
+        }
+        // Resets the portal
+        for (Portal portal : allPortals) {
+            if (portal != null) {
+                portal.gamePanel = gamePanel;
+            }
+        }
+        // Resets all enemies
+        for (Enemy enemy : allEnemies) {
+            if (enemy != null) {
+                enemy.gamePanel = gamePanel;
+            }
+        }
+        // Resets all projectiles
+        for (Projectile projectile : allProjectiles) {
+            if (projectile != null) {
+                projectile.gamePanel = gamePanel;
+            }
+        }
+        // Resets all mount
+        for (Mountable mount : allMounts) {
+            if (mount != null) {
+                mount.gamePanel = gamePanel;
+            }
+        }
+    }
+
     // Helper methods
     /**
      * Check if two rectangles are colliding
-     * 
+     *
      * @param left1 the left x value of the first rectangle
      * @param top1 the top y value of the first rectangle
      * @param right1 the right x value of the first rectangle
@@ -507,7 +591,7 @@ public class GameData implements Serializable {
 
     /**
      * Check if 2 Entity objects are colliding
-     * 
+     *
      * @param obj1 the first Entity object
      * @param obj2 the second Entity object
      * @return true if the entities are colliding, false otherwise

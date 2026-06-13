@@ -1,10 +1,14 @@
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.io.Serializable;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.IOException;
 
 public class ContainerStruct extends Structure {
     public Entity[] containing;
     public int[][] relativePos;  // Stored x and y positions to anchor entities to the structure
-    BufferedImage payImg;
+    transient BufferedImage payImg;
     public int numItems;
 
     /**
@@ -30,6 +34,7 @@ public class ContainerStruct extends Structure {
         for (int i = 0; i < containing.length; i++) {
             if (containing[i] == null) {
                 containing[i] = entity;
+                return;
             }
         }
     }
@@ -46,10 +51,11 @@ public class ContainerStruct extends Structure {
         }
         numItems = 0;
         int x = 0, y = 1;  // Too lazy to create a Coordinate class
+
         for (int i = 0; i < containing.length; i++) {
             if (containing[i] != null) {
-                containing[i].x = this.x + relativePos[i][x];
-                containing[i].y = this.y + relativePos[i][y];
+                containing[i].x = this.x + relativePos[i][x] * GamePanel.SCALE_PIXEL;
+                containing[i].y = this.y + relativePos[i][y] * GamePanel.SCALE_PIXEL;
                 numItems++;
             }
         }
@@ -84,5 +90,21 @@ public class ContainerStruct extends Structure {
         int yOnScreen = cam.convertY(imgY);
         g2d.drawImage(
                 payImg, xOnScreen, yOnScreen, hintWidth, hintHeight, null);
+    }
+
+    /**
+     * Custom deserialization to restore transient BufferedImage
+     * */
+    private void readObject(ObjectInputStream objIn) throws IOException, ClassNotFoundException {
+        objIn.defaultReadObject();
+        // Reload payImg from data
+        payImg = GameData.pathToImage(GameData.payHint[0]);
+    }
+
+    /**
+     * Custom serialization handler
+     * */
+    private void writeObject(ObjectOutputStream objOut) throws IOException {
+        objOut.defaultWriteObject();
     }
 }

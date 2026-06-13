@@ -3,7 +3,7 @@ import java.awt.*;
 public class Player extends Entity {
     public final MoneyBag moneyBag;
     public Mountable mount;
-    KeyHandler keyInput;
+    transient KeyHandler keyInput;
 
     /**
      * Initializes the player with crown anchored to the head and riding a default horse
@@ -45,7 +45,7 @@ public class Player extends Entity {
         super.update();
         // Update player's actions based on key inputs while mounted
         if (keyInput.downPressedOnce) {
-            Projectile tossedCoin = moneyBag.tossCoin(this);
+            Projectile tossedCoin = moneyBag.tossCoin("player");
             if (tossedCoin != null) {
                 gamePanel.gameData.allProjectiles.add(tossedCoin);
             }
@@ -76,7 +76,6 @@ public class Player extends Entity {
     @Override
     public void render(Graphics2D g2, Camera referenceCam) {
         super.render(g2, referenceCam);
-        super.renderItem(g2, referenceCam);
         moneyBag.render(g2);
     }
 }

@@ -1,4 +1,7 @@
 import java.io.Serializable;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.IOException;
 
 public class Camera implements Serializable {
     public int x;
@@ -7,7 +10,7 @@ public class Camera implements Serializable {
     public int height;
     public int deadZoneWidth;
     public int deadZoneHeight;
-    GamePanel gamePanel;
+    transient GamePanel gamePanel;
 
     /**
      * Initialize the Camera object
@@ -75,5 +78,21 @@ public class Camera implements Serializable {
         if (mainFocusBottom > freeBottom) { // Out of bottom bound
             this.y = mainFocusBottom + deadZoneHeight - this.height;
         }
+    }
+
+    /**
+     * Custom deserialization to handle transient gamePanel
+     * gamePanel must be set externally after deserialization
+     * */
+    private void readObject(ObjectInputStream objIn) throws IOException, ClassNotFoundException {
+        objIn.defaultReadObject();
+        // gamePanel is transient and must be set by the caller
+    }
+
+    /**
+     * Custom serialization handler
+     * */
+    private void writeObject(ObjectOutputStream objOut) throws IOException {
+        objOut.defaultWriteObject();
     }
 }

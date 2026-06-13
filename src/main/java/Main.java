@@ -5,10 +5,12 @@
 
 import javax.swing.JFrame;
 import javax.swing.ImageIcon;
+import java.awt.*;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 
 public class Main {
-    public static void main(String[] args) throws FileNotFoundException {
+    public static void main(String[] args) throws IOException, ClassNotFoundException {
         // Create the main screen
         JFrame mainScreen = new JFrame("Kingdom");
         mainScreen.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

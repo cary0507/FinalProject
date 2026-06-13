@@ -1,14 +1,20 @@
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.io.Serializable;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.IOException;
 
 /**
  * <a href="https://www.desmos.com/calculator/yj0hqvmoor">Experiment by myself</a>
  * */
-public class Orbits {
+public class Orbits implements Serializable {
+    private static final long serialVersionUID = 1L;
     int x, y;  // The left top corner of the orbiting object
     int width, height;
     int centerX, centerY;  // Orbit's location
-    BufferedImage image;
+    transient BufferedImage image;
+    String imagePath;  // Store path for serialization/deserialization
     int trackWidth, trackHeight;
     int trackCenterX, trackCenterY;  // Trajectory's location
     int halfTrackTime;  // Frames it takes to complete half a period
@@ -22,6 +28,7 @@ public class Orbits {
     }
 
     public void setImageFromPath(String imgPath) {
+        this.imagePath = imgPath;  // Store path for serialization
         image = GameData.pathToImage(imgPath);
         width = image.getWidth() * GamePanel.SCALE_PIXEL;
         height = image.getHeight() * GamePanel.SCALE_PIXEL;
@@ -63,5 +70,23 @@ public class Orbits {
         x = centerX - width / 2;
         y = centerY - height / 2;
         g2d.fillOval(x, y, width, height);
+    }
+
+    /**
+     * Custom deserialization to restore transient BufferedImage from stored path
+     * */
+    private void readObject(ObjectInputStream objIn) throws IOException, ClassNotFoundException {
+        objIn.defaultReadObject();
+        // Reload image from stored path
+        if (imagePath != null) {
+            image = GameData.pathToImage(imagePath);
+        }
+    }
+
+    /**
+     * Custom serialization handler
+     * */
+    private void writeObject(ObjectOutputStream objOut) throws IOException {
+        objOut.defaultWriteObject();
     }
 }

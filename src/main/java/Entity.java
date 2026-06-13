@@ -1,6 +1,9 @@
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.Serializable;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.IOException;
 
 public class Entity implements Serializable {
     public final double maxSpeed;
@@ -16,10 +19,13 @@ public class Entity implements Serializable {
     public int imgIndex;            // Determines which image to use for animation
     public int animeDuration;       // How many frames before switching to the next animation of image
     public int passedFrame;         // Frame passed
-    public BufferedImage[] leftImages;
-    public BufferedImage[] rightImages;
+    public transient BufferedImage[] leftImages;
+    public transient BufferedImage[] rightImages;
+    // Store image paths for serialization/deserialization
+    public String[] leftImagePaths;
+    public String[] rightImagePaths;
     // Environment
-    public GamePanel gamePanel;
+    public transient GamePanel gamePanel;
 
     /**
      * Initializes the entity with its position, hitbox dimensions, and movement parameters.
@@ -44,6 +50,11 @@ public class Entity implements Serializable {
      * @param rightImagePaths paths to right-facing images
      */
     public void setImagesFromPaths(String[] leftImagePaths, String[] rightImagePaths) {
+        // Store the paths for deserialization
+        this.leftImagePaths = leftImagePaths;
+        this.rightImagePaths = rightImagePaths;
+        
+        // Load the actual images
         leftImages = GameData.pathsToImages(leftImagePaths);
         rightImages = GameData.pathsToImages(rightImagePaths);
         // set hitbox size from the first available image
@@ -183,5 +194,26 @@ public class Entity implements Serializable {
         int onScreenWidth = img.getWidth() * GamePanel.SCALE_PIXEL;
         int onScreenHeight = img.getHeight() * GamePanel.SCALE_PIXEL;
         g2d.drawImage(img, screenX, screenY, onScreenWidth, onScreenHeight, null);
+        // Renders item holding, if has any
+        renderItem(g2d, referenceCam);
+    }
+
+    /**
+     * Custom deserialization to restore transient BufferedImage arrays from stored paths
+     * */
+    private void readObject(ObjectInputStream objIn) throws IOException, ClassNotFoundException {
+        objIn.defaultReadObject();
+        // Reload images from stored paths
+        if (leftImagePaths != null || rightImagePaths != null) {
+            leftImages = GameData.pathsToImages(leftImagePaths);
+            rightImages = GameData.pathsToImages(rightImagePaths);
+        }
+    }
+
+    /**
+     * Custom serialization handler
+     * */
+    private void writeObject(ObjectOutputStream objOut) throws IOException {
+        objOut.defaultWriteObject();
     }
 }

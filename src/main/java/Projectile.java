@@ -19,6 +19,7 @@ public class Projectile extends Entity {
     public Projectile(int x, int y, double maxSpeed, GamePanel gamePanel, ItemData data) {
         super(x, y, maxSpeed, gamePanel);
         this.data = data;
+        setImagesFromPaths(data.thrownImgPath, data.thrownImgPath);
     }
 
     /**
