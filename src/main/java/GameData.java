@@ -255,7 +255,7 @@ public class GameData implements Serializable {
      * Spawns a default NPC
      * */
     public Human spawnNPC(int x) {
-        Human npc = new Human(x, GamePanel.HORIZON, NPC_TOP_SPEED, townCenter, gamePanel);
+        Human npc = new Human(x, GamePanel.HORIZON, VAGRANT_TOP_SPEED, townCenter, gamePanel);
         npc.setImagesFromPaths(HUMAN_IMG_L, HUMAN_IMG_R);
         npc.y -= npc.hitboxHeight;
         return npc;

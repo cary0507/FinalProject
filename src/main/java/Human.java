@@ -4,7 +4,7 @@ public class Human extends Entity {
     public GameData.JobID id;
     public Structure habitat;
     public final MoneyBag MONEY_BAG;
-    public final int MAX_WANDER_FRAME = 2 * GamePanel.FPS;  // 2 seconds max
+    public final int MAX_WANDER_FRAME = 3 * GamePanel.FPS;  // 2 seconds max
     public int wanderFrame;
     public int wanderChance = 500;  // Higher = less likely
     public final int SHOOT_CD;
@@ -35,10 +35,11 @@ public class Human extends Entity {
      * */
     public void wander() {
         if (wanderFrame <= 0) return;
+        int speed = (int) (maxSpeed * 0.3);
         if (isFacingLeft) {
-            x -= 1;
+            x -= speed;
         } else {
-            x += 1;
+            x += speed;
         }
     }
 
@@ -49,14 +50,15 @@ public class Human extends Entity {
         if (this.habitat == null) {
             return;
         }
-        if (GameData.getDist(this, this.habitat) <= this.MAX_SPEED) {  // Anchors, if their distance is close enough
+        System.out.println(id + " go to destination");
+        if (GameData.getDist(this, this.habitat) <= this.maxSpeed) {  // Anchors, if their distance is close enough
             GameData.setCenterX(this, GameData.getCenterX(this.habitat));
         } else if (GameData.getCenterX(this) < GameData.getCenterX(this.habitat)) {
             this.isFacingLeft = false;
-            this.x += (int) this.MAX_SPEED;
+            this.x += (int) this.maxSpeed;
         } else if (GameData.getCenterX(this) > GameData.getCenterX(this.habitat)) {
             this.isFacingLeft = true;
-            this.x -= (int) this.MAX_SPEED;
+            this.x -= (int) this.maxSpeed;
         }
     }
 
@@ -85,7 +87,7 @@ public class Human extends Entity {
                 40, gamePanel, arrowData
         );
         arrow.setMotionValues(0, 0, 0, GameData.GRAVITY, 1, false);
-        arrow.setVelFromDir(Math.toRadians(facing), arrow.MAX_SPEED);
+        arrow.setVelFromDir(Math.toRadians(facing), arrow.maxSpeed);
         arrow.isFacingLeft = isFacingLeft;
         return arrow;
     }
@@ -106,6 +108,7 @@ public class Human extends Entity {
                 }
                 break;
             case VILLAGER:
+                maxSpeed = GameData.NPC_TOP_SPEED;
                 MONEY_BAG.capacity = 2;
                 wanderChance = 1000;
                 break;

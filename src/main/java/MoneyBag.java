@@ -85,6 +85,7 @@ public class MoneyBag implements Serializable {
      * Completely eliminate a coin
      * */
     public void exhaustCoin() {
+        if (coins.isEmpty()) return;
         coins.remove(coins.size() - 1);
     }
 
