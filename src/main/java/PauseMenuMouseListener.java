@@ -36,7 +36,7 @@ public class PauseMenuMouseListener extends MouseAdapter {
             panel.paused = false;
         } else if (panel.saveQuitBtn.contains(p)) {  // Save & Quit button
             try {
-                panel.gameData.saveGame("src/main/resources/serialized/save.ser");
+                panel.gameData.saveGame(GamePanel.SAVE_FILE);
             } catch (Exception ex) {
                 ex.printStackTrace();
             }

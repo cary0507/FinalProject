@@ -12,6 +12,9 @@ import java.util.Random;
 
 public class GamePanel extends JPanel implements Runnable {
     // Environment settings
+    // Store save file outside the project's JAR
+    public static final String SAVE_DIR = System.getProperty("user.home") + "/kingdomoldland/";  // Directory path
+    public static final String SAVE_FILE = SAVE_DIR + "save.ser";  // Save file path
     public static final int PANEL_WIDTH = 1200;
     public static final int PANEL_HEIGHT = 840;
     public static final int HORIZON = PANEL_HEIGHT - 300;
@@ -57,13 +60,13 @@ public class GamePanel extends JPanel implements Runnable {
         gameData = new GameData(keyboard, this);
         // Load the game
         try {
-            gameData = (GameData) gameData.loadGame("src/main/resources/serialized/save.ser");
+            gameData = (GameData) gameData.loadGame(SAVE_FILE);
 
         } catch (IOException e) {
             e.printStackTrace();
             gameData = new GameData(keyboard, this);
             // Overwrite the file with a new game data if the file is empty
-            gameData.saveGame("src/main/resources/serialized/save.ser");
+            gameData.saveGame(SAVE_FILE);
         }
         gameData.resetTransient(this, keyboard);
         leftBound = gameData.leftBound;

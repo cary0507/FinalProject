@@ -465,11 +465,22 @@ public class GameData implements Serializable {
     }
 
     /**
+     * Create the save directory if not exist
+     * */
+    private static void ensureSaveDirectory() {
+        File dir = new File(GamePanel.SAVE_DIR);
+        if (!dir.exists()) {
+            dir.mkdirs();
+        }
+    }
+
+    /**
      * Outputs the serialized objects to a specified file path
      *
      * @param filePath the path to save the game data file
      * */
     public void saveGame(String filePath) throws IOException {
+        ensureSaveDirectory();
         FileOutputStream fileOut = new FileOutputStream(filePath);
         ObjectOutputStream objOut = new ObjectOutputStream(fileOut);
         objOut.writeObject(this);
@@ -481,25 +492,26 @@ public class GameData implements Serializable {
      *
      * @param filePath the path to load the game data file from
      * */
-    public Object loadGame(String filePath) throws IOException, ClassNotFoundException {
-        FileInputStream fileIn = new FileInputStream(filePath);
-        ObjectInputStream objIn = new ObjectInputStream(fileIn);
-        Object loadedData = objIn.readObject();
-        objIn.close();
-        return loadedData;
+    public GameData loadGame(String filePath) throws IOException, ClassNotFoundException {
+        ensureSaveDirectory();
+        File file = new File(filePath);
+        try (ObjectInputStream objIn = new ObjectInputStream(new FileInputStream(file))) {
+            return (GameData) objIn.readObject();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new GameData(keyHandler, gamePanel);
+        }
     }
 
     /**
-     * Custom deserialization to restore transient GamePanel and KeyHandler references
-     * This method is called automatically when the GameData object is deserialized
+     * Restore transient GamePanel and KeyHandler references
      * */
     private void readObject(ObjectInputStream objIn) throws IOException, ClassNotFoundException {
         objIn.defaultReadObject();
     }
 
     /**
-     * Custom serialization handler
-     * Ensures that all necessary fields are properly serialized
+     * Ensures all necessary fields are serialized
      * */
     private void writeObject(ObjectOutputStream objOut) throws IOException {
         objOut.defaultWriteObject();
